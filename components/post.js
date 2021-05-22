@@ -1,8 +1,30 @@
 import { createContainer } from 'unstated-next'
 import { Fragment } from 'react'
-import { getTimestamp } from '~/lib/time'
+import { getTimestamp } from '../lib/time'
 import Link from 'next/link'
+import { omit, uniq, sortBy } from 'lodash'
 import { stringify } from 'qs'
+import {
+  WayfindingAdd,
+  WayfindingAscending,
+  WayfindingDescending,
+  WayfindingRemove,
+} from './wayfinding'
+
+const addToFilters = (addition = {}, filters = {}, config = {}) => {
+  const { removeKeys = [] } = config
+
+  return {
+    pathname: '/',
+    query: omit(
+      {
+        ...filters,
+        ...addition,
+      },
+      removeKeys
+    ),
+  }
+}
 
 const { Provider: PostProvider, useContainer: usePost } = createContainer(
   (initialState = {}) => {
@@ -13,41 +35,106 @@ const { Provider: PostProvider, useContainer: usePost } = createContainer(
 )
 
 const Filters = ({ filters }) => {
+  const tags = filters.tag ? sortBy(filters.tag.split(','), (tag) => tag) : []
+
   return (
     <div className="bg-yellow-50 dark:bg-gray-900 leading-6 md:leading-10 p-2 text-gray-300 dark:text-gray-700 text-lg md:text-4xl w-full">
-      Posts /
-      <Link href={`/?${stringify({
+      <Link href={addToFilters({}, filters)}>
+        <a className="text-gray-500 md:hover:text-blue-500">Posts</a>
+      </Link>
+      {filters.createdAt && (
+        <>
+          {' / From '}
+          <Timestamp
+            href={`/?createdAt=${new Date(filters.createdAt).toISOString()}`}
+            timestamp={filters.createdAt}
+          />
+          <WayfindingRemove
+            href={`/?${stringify(omit(filters, 'createdAt'))}`}
+            title="Remove published"
+          />
+        </>
+      )}
+      {filters.domain && (
+        <>
+          {' / On '}
+          <Link href={`/?domain=${filters.domain}`}>
+            <a className="break-words text-gray-500 md:hover:text-blue-500">
+              {filters.domain}
+            </a>
+          </Link>
+          <WayfindingRemove
+            href={`/?${stringify(omit(filters, 'domain'))}`}
+            title="Remove domain"
+          />
+        </>
+      )}
+      {filters.host && (
+        <>
+          {' / On '}
+          <Link href={`/?host=${filters.host}`}>
+            <a className="break-words text-gray-500 md:hover:text-blue-500">
+              {filters.host}
+            </a>
+          </Link>
+          <WayfindingRemove
+            href={`/?${stringify(omit(filters, 'host'))}`}
+            title="Remove host"
+          />
+        </>
+      )}
+      {filters.url && (
+        <>
+          {' / At '}
+          <Link href={`/?url=${filters.url}`}>
+            <a className="break-words text-gray-500 md:hover:text-blue-500">
+              {filters.url}
+            </a>
+          </Link>
+          <WayfindingRemove
+            href={`/?${stringify(omit(filters, 'url'))}`}
+            title="Remove URL"
+          />
+        </>
+      )}
+      {tags.length > 0 && (
+        <>
+          {' / Tagged'}
+          {tags.map((tag) => {
+            return (
+              <span key={`tag-${tag}`}>
+                {' '}
+                <Link href={`/?tag=${tag}`}>
+                  <a className="text-purple-300 dark:text-purple-800 md:hover:text-blue-500">
+                    {tag}
+                  </a>
+                </Link>
+              </span>
+            )
+          })}
+        </>
+      )}
+      {' / '}
+      <WayfindingAscending
+        href={`/?${stringify({
           ...filters,
           direction: 'asc',
-      })}`}>
-      <a
-          className={`${
-            filters.direction === 'asc'
-              ? 'text-blue-700 dark:text-blue-300'
-              : 'text-gray-400 dark:text-gray-600'
-          } md:hover:text-blue-500`}
-        >↑</a>
-      </Link>
-      <Link href={`/?${stringify({
+        })}`}
+        isActive={filters.direction === 'asc'}
+      />
+      <WayfindingDescending
+        href={`/?${stringify({
           ...filters,
           direction: 'desc',
-      })}`}>
-        <a
-          className={`${
-            filters.direction !== 'asc'
-              ? 'text-blue-700 dark:text-blue-300'
-              : 'text-gray-400 dark:text-gray-600'
-          } md:hover:text-blue-500`}
-        >
-          ↓
-        </a>
-      </Link>
+        })}`}
+        isActive={filters.direction !== 'asc'}
+      />
     </div>
   )
 }
 
 const LinkData = () => {
-  const { post } = usePost()
+  const { filters, post } = usePost()
 
   return (
     <li className="text-gray-300 dark:text-gray-700">
@@ -59,14 +146,21 @@ const LinkData = () => {
         href={`/?createdAt=${new Date(post?.createdAt).toISOString()}`}
         timestamp={post.createdAt}
       />
+      <WayfindingAdd
+        href={`/?${stringify({
+          ...filters,
+          createdAt: new Date(post?.createdAt).toISOString(),
+        })}`}
+        title="Add timestamp to query"
+      />
       <LinkTags />
     </li>
   )
 }
 
-export const LinkPost = ({ post }) => {
+export const LinkPost = ({ filters, post }) => {
   return (
-    <PostProvider initialState={{ post }}>
+    <PostProvider initialState={{ filters, post }}>
       <ul className="leading-6 md:leading-10 p-2 text-lg md:text-4xl w-full">
         <LinkPostTitle />
         <LinkPostDescription />
@@ -97,7 +191,7 @@ export const LinkPosts = ({ filters, nextTime, posts }) => {
       <Filters filters={filters} />
       <div className="space-y-4">
         {posts.map((post) => {
-          return <LinkPost key={post.id} post={post} />
+          return <LinkPost filters={filters} key={post.id} post={post} />
         })}
       </div>
       <Pagination filters={filters} nextTime={nextTime} />
@@ -106,7 +200,7 @@ export const LinkPosts = ({ filters, nextTime, posts }) => {
 }
 
 const LinkPostTitle = () => {
-  const { post } = usePost()
+  const { filters, post } = usePost()
 
   if (post.url) {
     return (
@@ -120,6 +214,18 @@ const LinkPostTitle = () => {
             {post.url.meta?.title ?? post.url.url}
           </a>
         </Link>
+        <WayfindingAdd
+          href={addToFilters(
+            {
+              url: post.url.url,
+            },
+            filters,
+            {
+              removeKeys: ['domain', 'host'],
+            }
+          )}
+          title="Add URL to query"
+        />
       </li>
     )
   }
@@ -128,7 +234,7 @@ const LinkPostTitle = () => {
 }
 
 const LinkPostUrl = () => {
-  const { post } = usePost()
+  const { filters, post } = usePost()
 
   if (!post.url) {
     return null
@@ -153,6 +259,18 @@ const LinkPostUrl = () => {
           {host}
         </a>
       </Link>
+      <WayfindingAdd
+        href={addToFilters(
+          {
+            host: post?.url.parsed.host,
+          },
+          filters,
+          {
+            removeKeys: ['domain', 'url'],
+          }
+        )}
+        title="Add host to query"
+      />
       {domain && (
         <>
           {' / '}
@@ -161,6 +279,18 @@ const LinkPostUrl = () => {
               {domain}
             </a>
           </Link>
+          <WayfindingAdd
+            href={addToFilters(
+              {
+                domain: post?.url.parsed.domain,
+              },
+              filters,
+              {
+                removeKeys: ['host', 'url'],
+              }
+            )}
+            title="Add domain to query"
+          />
         </>
       )}
     </li>
@@ -168,17 +298,28 @@ const LinkPostUrl = () => {
 }
 
 const LinkTags = () => {
-  const { post } = usePost()
+  const { filters, post } = usePost()
 
   if (post.tags.length > 0) {
     return (
       <>
         {' / Tagged'}
-        {post.tags.map((tag) => {
+        {sortBy(post.tags, (tag) => tag).map((tag) => {
           return (
             <Fragment key={`post-${post.id}-tag-${tag}`}>
               {' '}
               <Tag tag={tag} />
+              <WayfindingAdd
+                href={addToFilters(
+                  {
+                    tag: filters.tag
+                      ? uniq([...filters.tag.split(','), tag]).join(',')
+                      : tag,
+                  },
+                  filters
+                )}
+                title="Add tag to query"
+              />
             </Fragment>
           )
         })}
