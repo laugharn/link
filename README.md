@@ -20,6 +20,7 @@ A simple social bookmarking proof of concept built on a rainy Saturday morning.
 - [x] Initial setup
 - [x] Implement Prisma
 - [x] Link API
-- [ ] Link create UI
+- [x] Link create UI
 - [ ] Filtering UI
+- [ ] Polish
 - [ ] Deployment

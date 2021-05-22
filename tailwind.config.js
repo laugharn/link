@@ -4,6 +4,7 @@ const defaultTheme = require('tailwindcss/defaultTheme')
 const config = {
   darkMode: 'media',
   mode: 'jit',
+  plugins: [require('@tailwindcss/forms')],
   purge: {
     content: ['./components/**/*.js', './pages/**/*.js'],
   },
