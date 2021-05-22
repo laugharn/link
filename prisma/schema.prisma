@@ -1,0 +1,43 @@
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum PostStatus {
+    publish
+}
+
+enum PostType {
+    link
+}
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+model Post {
+    id          Int        @id @default(autoincrement())
+    // Fields
+    body        String?
+    status      PostStatus @default(publish)
+    tags        String[]
+    type        PostType
+    // Relations
+    url         Url?       @relation(fields: [urlId], references: [id])
+    urlId       Int?
+    // Timestamps
+    createdAt   DateTime   @default(now())
+    publishedAt DateTime?
+    updatedAt   DateTime   @default(now()) @updatedAt
+}
+
+model Url {
+    id        Int      @id @default(autoincrement())
+    // Fields
+    url       String   @unique
+    // Relations
+    posts     Post[]
+    // Timestamps
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
+}

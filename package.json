@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@prisma/client": "2.23.0",
     "next": "10.2.2",
     "react": "17.0.2",
     "react-dom": "17.0.2"
@@ -7,6 +8,7 @@
   "devDependencies": {
     "autoprefixer": "10.2.5",
     "postcss": "8.3.0",
+    "prisma": "2.23.0",
     "tailwindcss": "2.2.0-canary.9"
   },
   "license": "UNLICENSED",
@@ -16,6 +18,11 @@
   },
   "scripts": {
     "build": "next build",
+    "db:env": "cp .env.local prisma/.env",
+    "db:generate": "prisma generate",
+    "db:init": "yarn db:env && yarn db:reset",
+    "db:reset": "prisma db push --accept-data-loss --force-reset",
+    "db:studio": "prisma studio",
     "dev": "next",
     "start": "next start"
   },
