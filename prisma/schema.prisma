@@ -3,10 +3,6 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-enum PostStatus {
-    publish
-}
-
 enum PostType {
     link
 }
@@ -16,24 +12,24 @@ generator client {
 }
 
 model Post {
-    id          Int        @id @default(autoincrement())
+    id        Int      @id @default(autoincrement())
     // Fields
-    body        String?
-    status      PostStatus @default(publish)
-    tags        String[]
-    type        PostType
+    body      String?
+    tags      String[]
+    type      PostType
     // Relations
-    url         Url?       @relation(fields: [urlId], references: [id])
-    urlId       Int?
+    url       Url?     @relation(fields: [urlId], references: [id])
+    urlId     Int?
     // Timestamps
-    createdAt   DateTime   @default(now())
-    publishedAt DateTime?
-    updatedAt   DateTime   @default(now()) @updatedAt
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
 }
 
 model Url {
     id        Int      @id @default(autoincrement())
     // Fields
+    meta      Json     @default("{}")
+    parsed    Json     @default("{}")
     url       String   @unique
     // Relations
     posts     Post[]
