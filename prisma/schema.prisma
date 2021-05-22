@@ -8,6 +8,7 @@ enum PostType {
 }
 
 generator client {
+    previewFeatures = ["filterJson"]
     provider = "prisma-client-js"
 }
 

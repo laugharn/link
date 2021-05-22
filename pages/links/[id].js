@@ -1,13 +1,18 @@
 import Head from 'next/head'
 import { isFinite } from 'lodash'
+import { LinkPost } from '~/components/post'
 import { PrismaClient } from '@prisma/client'
 
-const Page = ({ post }) => <>
-<Head>
-    <title>Link no. {post.id} at {post.url.url} - Link</title>
-</Head>
-<div className="p-2">{JSON.stringify(post)}</div>
-</>
+const Page = ({ post }) => (
+  <>
+    <Head>
+      <title>
+        Link no. {post.id} at {post.url.url} - Link
+      </title>
+    </Head>
+    <LinkPost post={post} />
+  </>
+)
 
 export const getStaticPaths = () => {
   return {

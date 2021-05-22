@@ -114,7 +114,18 @@ const store = async (req, res) => {
           $('meta[property="twitter:player:width"]').attr('content'),
       }
 
-      const parsed = parse(normalizedUrl)
+      let parsed = parse(normalizedUrl)
+
+      const duplexes = ['co.uk']
+      const parts = parsed.host.split('.')
+      const [_, domain] =
+        parts.length > 2
+          ? duplexes.find((duplex) => parsed.host.endsWith(duplex))
+            ? [parts.slice(0, -3).join('.'), parts.slice(-3).join('.')]
+            : [parts.slice(0, -2).join('.'), parts.slice(-2).join('.')]
+          : [parsed.host]
+
+      parsed.domain = domain
 
       await prisma.$connect()
 
