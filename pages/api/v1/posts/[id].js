@@ -11,10 +11,10 @@ const show = async (req, res) => {
     return
   }
 
-  try {
-    const prisma = new PrismaClient()
-    await prisma.$connect()
+  const prisma = new PrismaClient()
+  await prisma.$connect()
 
+  try {
     const post = await prisma.post.findUnique({
       include: {
         url: true,

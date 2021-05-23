@@ -2,23 +2,6 @@ import cheerio from 'cheerio'
 import { parse } from 'url'
 import { prisma, PrismaClient } from '@prisma/client'
 
-const index = async (req, res) => {
-  const prisma = new PrismaClient()
-  await prisma.$connect()
-
-  const posts = await prisma.post
-    .findMany({
-      include: {
-        url: true,
-      },
-    })
-    .then((response) => JSON.parse(JSON.stringify(response)))
-
-  await prisma.$disconnect()
-
-  res.json({ posts })
-}
-
 const store = async (req, res) => {
   const { url, ...data } = req.body
 
@@ -30,12 +13,11 @@ const store = async (req, res) => {
   }
 
   const date = new Date()
-  const normalizedUrl = url
+
+  const prisma = new PrismaClient()
+  await prisma.$connect()
 
   try {
-    const prisma = new PrismaClient()
-    await prisma.$connect()
-
     const post = await prisma.post.create({
       data: {
         createdAt: date,
@@ -45,10 +27,10 @@ const store = async (req, res) => {
             create: {
               createdAt: date,
               updatedAt: date,
-              url: normalizedUrl,
+              url,
             },
             where: {
-              url: normalizedUrl,
+              url,
             },
           },
         },
@@ -64,7 +46,7 @@ const store = async (req, res) => {
     if (post.url.createdAt.toString() === date.toString()) {
       let html = '<html></html>'
 
-      html = await fetch(normalizedUrl)
+      html = await fetch(url)
         .then(async (response) => await response.text())
         .catch(() => '<html></html>')
 
@@ -114,7 +96,7 @@ const store = async (req, res) => {
           $('meta[property="twitter:player:width"]').attr('content'),
       }
 
-      let parsed = parse(normalizedUrl)
+      let parsed = parse(url)
 
       const duplexes = ['co.uk']
       const parts = parsed.host.split('.')
@@ -135,7 +117,7 @@ const store = async (req, res) => {
           parsed,
         },
         where: {
-          url: normalizedUrl,
+          url,
         },
       })
     }
@@ -146,8 +128,8 @@ const store = async (req, res) => {
   } catch (error) {
     await prisma.$disconnect()
 
-    res.statusMessage = error.message ?? 'Bad Request'
-    res.status(error.statusCode ?? 400).end()
+    res.statusMessage = 'Bad Request'
+    res.status(400).end()
 
     return
   }
@@ -156,9 +138,7 @@ const store = async (req, res) => {
 const handler = async (req, res) => {
   const { method } = req
 
-  if (method === 'GET') {
-    await index(req, res)
-  } else if (method === 'POST') {
+  if (method === 'POST') {
     await store(req, res)
   } else {
     res.statusMessage = 'Method Not Allowed'

@@ -1,12 +1,12 @@
 import { getLinks } from '~/lib/post'
-import Head from 'next/head'
+import { Head } from '~/components/head'
 import { LinkPosts } from '~/components/post'
 
 const Page = ({ filters, nextTime, posts }) => {
   return (
     <>
       <Head>
-        <title>Home - Link</title>
+        <title>Home - Links</title>
       </Head>
       <LinkPosts filters={filters} nextTime={nextTime} posts={posts} />
     </>

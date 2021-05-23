@@ -1,13 +1,12 @@
-import Head from 'next/head'
-import { isFinite } from 'lodash'
+import { getLink } from '~/lib/post'
+import { Head } from '~/components/head'
 import { LinkPost } from '~/components/post'
-import { PrismaClient } from '@prisma/client'
 
 const Page = ({ post }) => (
   <>
     <Head>
       <title>
-        Link no. {post.id} at {post.url.url} - Link
+        Link no. {post.id} at {post.url.url} - Links
       </title>
     </Head>
     <LinkPost post={post} />
@@ -22,30 +21,7 @@ export const getStaticPaths = () => {
 }
 
 export const getStaticProps = async ({ params }) => {
-  const id = parseInt(params.id)
-
-  if (!isFinite(id)) {
-    return {
-      notFound: true,
-    }
-  }
-
-  const prisma = new PrismaClient()
-  await prisma.$connect()
-
-  const post = await prisma.post
-    .findFirst({
-      include: {
-        url: true,
-      },
-      where: {
-        type: 'link',
-        id,
-      },
-    })
-    .then((response) => JSON.parse(JSON.stringify(response)))
-
-  await prisma.$disconnect()
+  const post = await getLink(params)
 
   if (!post) {
     return {

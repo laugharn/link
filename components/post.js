@@ -39,9 +39,20 @@ const Filters = ({ filters }) => {
 
   return (
     <div className="bg-yellow-50 dark:bg-gray-900 leading-6 md:leading-10 p-2 text-gray-300 dark:text-gray-700 text-lg md:text-4xl w-full">
-      <Link href={addToFilters({}, filters)}>
-        <a className="text-gray-500 md:hover:text-blue-500">Posts</a>
-      </Link>
+      <WayfindingAscending
+        href={`/?${stringify({
+          ...filters,
+          direction: 'asc',
+        })}`}
+        isActive={filters.direction === 'asc'}
+      />
+      <WayfindingDescending
+        href={`/?${stringify({
+          ...filters,
+          direction: 'desc',
+        })}`}
+        isActive={filters.direction !== 'asc'}
+      />
       {filters.createdAt && (
         <>
           {' / From '}
@@ -114,21 +125,6 @@ const Filters = ({ filters }) => {
           })}
         </>
       )}
-      {' / '}
-      <WayfindingAscending
-        href={`/?${stringify({
-          ...filters,
-          direction: 'asc',
-        })}`}
-        isActive={filters.direction === 'asc'}
-      />
-      <WayfindingDescending
-        href={`/?${stringify({
-          ...filters,
-          direction: 'desc',
-        })}`}
-        isActive={filters.direction !== 'asc'}
-      />
     </div>
   )
 }
@@ -139,9 +135,9 @@ const LinkData = () => {
   return (
     <li className="text-gray-300 dark:text-gray-700">
       <Link href={`/links/${post.id}`}>
-        <a className="text-black dark:text-white md:hover:text-blue-500">↳</a>
+        <a className="text-black dark:text-white md:hover:text-blue-500" title="Go to Link">↳</a>
       </Link>
-      {' / Created '}
+      {' / Linked '}
       <Timestamp
         href={`/?createdAt=${new Date(post?.createdAt).toISOString()}`}
         timestamp={post.createdAt}
@@ -190,6 +186,11 @@ export const LinkPosts = ({ filters, nextTime, posts }) => {
     <div className="w-full">
       <Filters filters={filters} />
       <div className="space-y-4">
+        {posts.length === 0 && (
+          <div className="leading-6 md:leading-10 p-2 text-lg md:text-4xl text-gray-300 dark:text-gray-800">
+            No links match your query.
+          </div>
+        )}
         {posts.map((post) => {
           return <LinkPost filters={filters} key={post.id} post={post} />
         })}
@@ -203,15 +204,18 @@ const LinkPostTitle = () => {
   const { filters, post } = usePost()
 
   if (post.url) {
+
+    const title = post.url.meta?.title.length > 0 ? post.url.meta.title : post.url.url
+
     return (
       <li>
         <Link href={post.url.url}>
           <a
             className="md:hover:text-blue-500"
             target="_blank"
-            title={post.url.meta?.title ?? post.url.url}
+            title={title}
           >
-            {post.url.meta?.title ?? post.url.url}
+            {title}
           </a>
         </Link>
         <WayfindingAdd
@@ -354,7 +358,7 @@ const Pagination = ({ filters, nextTime }) => {
 const Tag = ({ tag }) => {
   return (
     <Link href={`/?tag=${tag}`}>
-      <a className="text-purple-300 dark:text-purple-800 md:hover:text-blue-500">
+      <a className="text-purple-300 dark:text-purple-800 md:hover:text-blue-500" title={`Go to tag "${tag}"`}>
         {tag}
       </a>
     </Link>

@@ -23,6 +23,8 @@ A simple social bookmarking proof of concept built on a rainy Saturday morning.
 - [x] Link create UI
 - [x] Filtering UI
 - [x] Wayfinding UI
-- [ ] Polish
+- [x] Tweaks
+- [ ] Authentication
 - [ ] Deployment
+- [ ] Polish
 - [ ] Documentation
