@@ -4,6 +4,8 @@ import { getTimestamp } from '../lib/time'
 import Link from 'next/link'
 import { omit, uniq, sortBy } from 'lodash'
 import { stringify } from 'qs'
+import { useAuth } from '../containers/auth'
+import { useState } from 'react'
 import {
   WayfindingAdd,
   WayfindingAscending,
@@ -30,7 +32,10 @@ const { Provider: PostProvider, useContainer: usePost } = createContainer(
   (initialState = {}) => {
     const { filters = {}, post } = initialState
 
-    return { filters, post }
+    const [isDeleted, setIsDeleted] = useState(false)
+    const [isDeleting, setIsDeleting] = useState(false)
+
+    return { filters, isDeleted, isDeleting, post, setIsDeleted, setIsDeleting }
   }
 )
 
@@ -144,7 +149,8 @@ const Filters = ({ filters }) => {
 }
 
 const LinkData = () => {
-  const { filters, post } = usePost()
+  const { authenticated, user } = useAuth()
+  const { filters, isDeleting, post, setIsDeleted, setIsDeleting } = usePost()
 
   return (
     <li className="text-gray-300 dark:text-gray-700">
@@ -175,20 +181,43 @@ const LinkData = () => {
         title="Add timestamp to query"
       />
       <LinkTags />
+      {authenticated && user?.id === post.user.id && (
+        <>
+          {' / '}
+          <button className="text-red-300 dark:text-red-800 md:hover:text-blue-500" disabled={isDeleting} onClick={async () => {
+            setIsDeleting(true)
+
+            await fetch(`/api/v1/posts/${post.id}`, {
+              method: 'DELETE',
+            }).then(response => {
+              setIsDeleting(false)
+
+              if (response.ok) {
+                setIsDeleted(true)
+              }
+            })
+          }}>
+            Delete
+          </button>
+        </>
+      )}
     </li>
   )
 }
 
-export const LinkPost = ({ filters, post }) => {
+export const LinkPost = () => {
+  const { isDeleted } = usePost()
+
   return (
-    <PostProvider initialState={{ filters, post }}>
-      <ul className="leading-6 md:leading-10 p-2 text-lg md:text-4xl w-full">
-        <LinkPostTitle />
-        <LinkPostDescription />
-        <LinkPostUrl />
-        <LinkData />
-      </ul>
-    </PostProvider>
+    <ul className="leading-6 md:leading-10 p-2 relative text-lg md:text-4xl w-full">
+      <LinkPostTitle />
+      <LinkPostDescription />
+      <LinkPostUrl />
+      <LinkData />
+      {isDeleted && (
+        <div className="absolute bg-white dark:bg-black inset-0 opacity-50 z-20" />
+      )}
+    </ul>
   )
 }
 
@@ -217,7 +246,11 @@ export const LinkPosts = ({ filters, nextTime, posts }) => {
           </div>
         )}
         {posts.map((post) => {
-          return <LinkPost filters={filters} key={post.id} post={post} />
+          return (
+            <Post filters={filters} key={post.id} post={post}>
+              <LinkPost />
+            </Post>
+          )
         })}
       </div>
       <Pagination filters={filters} nextTime={nextTime} />
@@ -373,6 +406,12 @@ const Pagination = ({ filters, nextTime }) => {
         </a>
       </Link>
     </div>
+  )
+}
+
+export const Post = ({ children, filters, post }) => {
+  return (
+    <PostProvider initialState={{ filters, post }}>{children}</PostProvider>
   )
 }
 

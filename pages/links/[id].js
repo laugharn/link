@@ -1,6 +1,6 @@
 import { getLink } from '~/lib/post'
 import { Head } from '~/components/head'
-import { LinkPost } from '~/components/post'
+import { LinkPost, Post } from '~/components/post'
 
 const Page = ({ post }) => (
   <>
@@ -9,7 +9,9 @@ const Page = ({ post }) => (
         Link no. {post.id} at {post.url.url} - Links
       </title>
     </Head>
-    <LinkPost post={post} />
+    <Post post={post}>
+      <LinkPost />
+    </Post>
   </>
 )
 

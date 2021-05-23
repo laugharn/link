@@ -136,8 +136,7 @@ export const FormStart = () => {
 }
 
 const FormStartCode = () => {
-  const { push } = useRouter()
-  const { setAuthenticated } = useAuth()
+  const { login } = useAuth()
   const { setStep, step } = useStartForm()
 
   const [callback, setCallback] = useState()
@@ -157,17 +156,16 @@ const FormStartCode = () => {
             throw Error('Not Found')
           }
 
-          const { redirect } = await response.json()
+          const { redirect, user } = await response.json()
 
           setCallback({
             message: 'Successful login! Redirecting...',
             type: 'success',
           })
 
-          setAuthenticated(true)
-          push(redirect ?? '/create')
+          await login(user, redirect)
         })
-        .catch((error) => {
+        .catch(() => {
           setCallback({
             message: 'Pass not found!',
             type: 'error',

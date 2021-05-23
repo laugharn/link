@@ -1,13 +1,22 @@
 import { isFinite } from 'lodash'
 import { PrismaClient } from '@prisma/client'
+import { withSession } from '~/lib/session'
 
-const show = async (req, res) => {
-  const id = parseInt(req.query.id)
+const destroy = async (req, res) => {
+  const { query, session } = req
 
-  if (!isFinite(id)) {
-    res.statusMessage = 'Bad Request'
-    res.status(400).end()
+  const id = session.get('id')
+  const postId = parseInt(query.id)
 
+  if (!id) {
+    res.statusMessage = 'Unauthorized'
+    res.status(401).end()
+    return
+  }
+
+  if (!isFinite(postId)) {
+    res.statusMessage = 'Unprocessable Entity'
+    res.status(422).end()
     return
   }
 
@@ -15,42 +24,35 @@ const show = async (req, res) => {
   await prisma.$connect()
 
   try {
-    const post = await prisma.post.findUnique({
-      include: {
-        url: true,
-      },
+    await prisma.post.deleteMany({
       where: {
-        id,
+        id: postId,
+        user: {
+          id,
+        },
       },
     })
-
+  
     await prisma.$disconnect()
 
-    if (!post) {
-      res.statusMessage = 'Not Found'
-      res.status(404).end()
-
-      return
-    }
-
-    res.json({ post })
+    res.end("ok")
   } catch (error) {
     await prisma.$disconnect()
 
-    res.statusMessage = 'Not Found'
-    res.status(404).end()
+    res.statusMessage = 'Bad Request'
+    res.status(400).end()
   }
 }
 
 const handler = async (req, res) => {
   const { method } = req
 
-  if (method === 'GET') {
-    await show(req, res)
+  if (method === 'DELETE') {
+    await destroy(req, res)
   } else {
     res.statusMessage = 'Method Not Allowed'
     res.status(405).end()
   }
 }
 
-export default handler
+export default withSession(handler)

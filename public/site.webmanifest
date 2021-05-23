@@ -1,0 +1,22 @@
+{
+    "background_color": "#000000",
+    "description": "A website for sharing links.",
+    "display": "standalone",
+    "icons": [
+      {
+        "src": "/img/512.png",
+        "type": "image/png",
+        "sizes": "192x192"
+      },
+      {
+        "src": "/img/512.png",
+        "type": "image/png",
+        "sizes": "512x512"
+      }
+    ],
+    "name": "Links",
+    "orientation": "portrait",
+    "short_name": "Links",
+    "start_url": "/",
+    "theme_color": "#fff"
+  }
