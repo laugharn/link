@@ -1,9 +1,20 @@
 import cheerio from 'cheerio'
 import { parse } from 'url'
-import { prisma, PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
+import { withSession } from '~/lib/session'
 
 const store = async (req, res) => {
-  const { url, ...data } = req.body
+  const { body, session } = req
+
+  const id = session.get('id')
+
+  if (!id) {
+    res.statusMessage = 'Unauthorized'
+    res.status(401).end()
+    return
+  }
+
+  const { url, ...data } = body
 
   if ([data.type !== 'link', !url].includes(true)) {
     res.statusMessage = 'Unprocessable Entity'
@@ -28,16 +39,27 @@ const store = async (req, res) => {
               createdAt: date,
               updatedAt: date,
               url,
+              user: {
+                connect: {
+                  id,
+                },
+              },
             },
             where: {
               url,
             },
           },
         },
+        user: {
+          connect: {
+            id,
+          },
+        },
         ...data,
       },
       include: {
         url: true,
+        user: true,
       },
     })
 
@@ -128,6 +150,8 @@ const store = async (req, res) => {
   } catch (error) {
     await prisma.$disconnect()
 
+    console.log(error)
+
     res.statusMessage = 'Bad Request'
     res.status(400).end()
 
@@ -146,4 +170,4 @@ const handler = async (req, res) => {
   }
 }
 
-export default handler
+export default withSession(handler)

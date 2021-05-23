@@ -24,7 +24,7 @@ A simple social bookmarking proof of concept built on a rainy Saturday morning.
 - [x] Filtering UI
 - [x] Wayfinding UI
 - [x] Tweaks
-- [ ] Authentication
-- [ ] Deployment
+- [x] Authentication
 - [ ] Polish
+- [ ] Deployment
 - [ ] Documentation

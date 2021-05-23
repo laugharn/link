@@ -9,7 +9,21 @@ enum PostType {
 
 generator client {
     previewFeatures = ["filterJson"]
-    provider = "prisma-client-js"
+    provider        = "prisma-client-js"
+}
+
+model Pass {
+    id        String   @id @default(cuid())
+    // Fields
+    code      String   @unique
+    email     String
+    redirect  String?
+    // Relations
+    user      User     @relation(fields: [userId], references: [id])
+    userId    Int
+    // Timestamps
+    createdAt DateTime @default(now())
+    expiresAt DateTime
 }
 
 model Post {
@@ -21,6 +35,8 @@ model Post {
     // Relations
     url       Url?     @relation(fields: [urlId], references: [id])
     urlId     Int?
+    user      User     @relation(fields: [userId], references: [id])
+    userId    Int
     // Timestamps
     createdAt DateTime @default(now())
     updatedAt DateTime @default(now()) @updatedAt
@@ -34,7 +50,21 @@ model Url {
     url       String   @unique
     // Relations
     posts     Post[]
+    user      User     @relation(fields: [userId], references: [id])
+    userId    Int
     // Timestamps
     createdAt DateTime @default(now())
     updatedAt DateTime @default(now()) @updatedAt
+}
+
+model User {
+    id        Int      @id @default(autoincrement())
+    // Fields
+    email     String   @unique
+    // Relations
+    passes    Pass[]
+    posts     Post[]
+    urls      Url[]
+    // Timestamps
+    createdAt DateTime @default(now())
 }

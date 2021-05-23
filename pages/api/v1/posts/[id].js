@@ -1,5 +1,5 @@
 import { isFinite } from 'lodash'
-import { prisma, PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
 
 const show = async (req, res) => {
   const id = parseInt(req.query.id)

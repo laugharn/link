@@ -53,6 +53,20 @@ const Filters = ({ filters }) => {
         })}`}
         isActive={filters.direction !== 'asc'}
       />
+      {filters.user && (
+        <>
+          {' / By '}
+          <Link href={`/?user=${filters.user}`}>
+            <a className="break-words text-gray-500 md:hover:text-blue-500">
+              User No. {filters.user}
+            </a>
+          </Link>
+          <WayfindingRemove
+            href={`/?${stringify(omit(filters, 'user'))}`}
+            title="Remove user"
+          />
+        </>
+      )}
       {filters.createdAt && (
         <>
           {' / From '}
@@ -62,7 +76,7 @@ const Filters = ({ filters }) => {
           />
           <WayfindingRemove
             href={`/?${stringify(omit(filters, 'createdAt'))}`}
-            title="Remove published"
+            title="Remove created at"
           />
         </>
       )}
@@ -135,7 +149,18 @@ const LinkData = () => {
   return (
     <li className="text-gray-300 dark:text-gray-700">
       <Link href={`/links/${post.id}`}>
-        <a className="text-black dark:text-white md:hover:text-blue-500" title="Go to Link">↳</a>
+        <a
+          className="text-black dark:text-white md:hover:text-blue-500"
+          title="Go to Link"
+        >
+          ↳
+        </a>
+      </Link>
+      {` / By `}
+      <Link href={`/?user=${post.user.id}`}>
+        <a className="text-black dark:text-white md:hover:text-blue-500">
+          User No. {post.user.id}
+        </a>
       </Link>
       {' / Linked '}
       <Timestamp
@@ -185,7 +210,7 @@ export const LinkPosts = ({ filters, nextTime, posts }) => {
   return (
     <div className="w-full">
       <Filters filters={filters} />
-      <div className="space-y-4">
+      <div className="md:space-y-4">
         {posts.length === 0 && (
           <div className="leading-6 md:leading-10 p-2 text-lg md:text-4xl text-gray-300 dark:text-gray-800">
             No links match your query.
@@ -204,17 +229,13 @@ const LinkPostTitle = () => {
   const { filters, post } = usePost()
 
   if (post.url) {
-
-    const title = post.url.meta?.title.length > 0 ? post.url.meta.title : post.url.url
+    const title =
+      post.url.meta?.title.length > 0 ? post.url.meta.title : post.url.url
 
     return (
       <li>
         <Link href={post.url.url}>
-          <a
-            className="md:hover:text-blue-500"
-            target="_blank"
-            title={title}
-          >
+          <a className="md:hover:text-blue-500" target="_blank" title={title}>
             {title}
           </a>
         </Link>
@@ -358,7 +379,10 @@ const Pagination = ({ filters, nextTime }) => {
 const Tag = ({ tag }) => {
   return (
     <Link href={`/?tag=${tag}`}>
-      <a className="text-purple-300 dark:text-purple-800 md:hover:text-blue-500" title={`Go to tag "${tag}"`}>
+      <a
+        className="text-purple-300 dark:text-purple-800 md:hover:text-blue-500"
+        title={`Go to tag "${tag}"`}
+      >
         {tag}
       </a>
     </Link>

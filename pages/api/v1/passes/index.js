@@ -1,0 +1,56 @@
+import { PrismaClient } from '@prisma/client'
+import { randomNumbers } from '~/lib/string'
+import { ttl } from '~/lib/time'
+
+const store = async ({ body }, res) => {
+  const { email, redirect = '/' } = body
+
+  const prisma = new PrismaClient()
+  await prisma.$connect()
+
+  const date = new Date()
+
+  const pass = await prisma.pass.create({
+    data: {
+      code: randomNumbers(6),
+      createdAt: date,
+      email,
+      expiresAt: ttl(900, date),
+      redirect,
+      user: {
+        connectOrCreate: {
+          create: {
+            createdAt: date,
+            email,
+          },
+          where: {
+            email,
+          },
+        },
+      },
+    },
+  })
+
+  await prisma.$disconnect()
+
+  if (process.env.NODE_ENV === 'production') {
+    // TODO: Send an Email
+  } else {
+    console.log(pass.code)
+  }
+
+  res.end()
+}
+
+const handler = async (req, res) => {
+  const { method } = req
+
+  if (method === 'POST') {
+    await store(req, res)
+  } else {
+    res.statusMessage = 'Method Not Allowed'
+    res.status(405).end()
+  }
+}
+
+export default handler
