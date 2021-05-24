@@ -168,35 +168,48 @@ const LinkData = () => {
           User No. {post.user.id}
         </a>
       </Link>
+      <WayfindingAdd
+        href={addToFilters(
+          {
+            user: post.user.id,
+          },
+          filters
+        )}
+        title="Add user to query"
+      />
       {' / Linked '}
       <Timestamp
         href={`/?createdAt=${new Date(post?.createdAt).toISOString()}`}
         timestamp={post.createdAt}
       />
       <WayfindingAdd
-        href={`/?${stringify({
-          ...filters,
-          createdAt: new Date(post?.createdAt).toISOString(),
-        })}`}
+        href={addToFilters(
+          { createdAt: new Date(post?.createdAt).toISOString() },
+          filters
+        )}
         title="Add timestamp to query"
       />
       <LinkTags />
       {authenticated && user?.id === post.user.id && (
         <>
           {' / '}
-          <button className="text-red-300 dark:text-red-800 md:hover:text-blue-500" disabled={isDeleting} onClick={async () => {
-            setIsDeleting(true)
+          <button
+            className="text-red-300 dark:text-red-800 md:hover:text-blue-500"
+            disabled={isDeleting}
+            onClick={async () => {
+              setIsDeleting(true)
 
-            await fetch(`/api/v1/posts/${post.id}`, {
-              method: 'DELETE',
-            }).then(response => {
-              setIsDeleting(false)
+              await fetch(`/api/v1/posts/${post.id}`, {
+                method: 'DELETE',
+              }).then((response) => {
+                setIsDeleting(false)
 
-              if (response.ok) {
-                setIsDeleted(true)
-              }
-            })
-          }}>
+                if (response.ok) {
+                  setIsDeleted(true)
+                }
+              })
+            }}
+          >
             Delete
           </button>
         </>

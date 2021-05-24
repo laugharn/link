@@ -26,5 +26,5 @@ A simple social bookmarking proof of concept built on a rainy Saturday morning.
 - [x] Tweaks
 - [x] Authentication
 - [x] Polish
-- [ ] Deployment
+- [x] Deployment
 - [ ] Documentation
