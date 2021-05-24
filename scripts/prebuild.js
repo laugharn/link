@@ -1,5 +1,6 @@
 const fetch = require('node-fetch')
 const fs = require('fs')
+const { kebabCase } = require('lodash')
 
 const {
   CI,
@@ -20,7 +21,7 @@ if (!CI) {
 }
 
 const Authorization = `Bearer ${DIGITALOCEAN_TOKEN}`
-const name = `links_${VERCEL_GIT_COMMIT_REF}`
+const name = `links_${kebabCase(VERCEL_GIT_COMMIT_REF)}`
 
 const init = async () => {
   const response = await fetch(
@@ -38,7 +39,6 @@ const init = async () => {
   })
 
   if (response.message && response.message !== 'database name is not available') {
-    console.log(response)
     throw new Error(response.message)
   }
 
