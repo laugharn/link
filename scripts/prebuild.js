@@ -12,6 +12,8 @@ const {
   VERCEL_GIT_COMMIT_REF,
 } = process.env
 
+console.log(process.env)
+
 if (!CI) {
   console.log('Running outside of CI, this is a no-op.')
   return true
