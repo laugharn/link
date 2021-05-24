@@ -36,6 +36,7 @@ const init = async () => {
   })
 
   if (response.message && response.message !== 'database name is not available') {
+    console.log(response)
     throw new Error(response.message)
   }
 

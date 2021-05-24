@@ -29,7 +29,7 @@
     "singleQuote": true
   },
   "scripts": {
-    "build": "node scripts/prebuild && yarn db:push && next build",
+    "build": "yarn db:push && next build",
     "db:env": "cp .env.local prisma/.env",
     "db:generate": "prisma generate",
     "db:init": "yarn db:env && yarn db:reset",
@@ -38,6 +38,7 @@
     "db:seed": "prisma db seed --preview-feature",
     "db:studio": "prisma studio",
     "dev": "next",
+    "prebuild": "node scripts/prebuild",
     "start": "next start"
   },
   "version": "0.0.1"
