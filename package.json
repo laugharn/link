@@ -5,6 +5,7 @@
     "formik": "2.2.8",
     "js-cookie": "2.2.1",
     "lodash": "4.17.21",
+    "mailgun-js": "0.22.0",
     "next": "10.2.2",
     "next-iron-session": "4.1.13",
     "nprogress": "0.2.0",
@@ -28,7 +29,7 @@
     "singleQuote": true
   },
   "scripts": {
-    "build": "next build",
+    "build": "yarn db:push && next build",
     "db:env": "cp .env.local prisma/.env",
     "db:generate": "prisma generate",
     "db:init": "yarn db:env && yarn db:reset",
@@ -37,6 +38,7 @@
     "db:seed": "prisma db seed --preview-feature",
     "db:studio": "prisma studio",
     "dev": "next",
+    "prebuild": "node scripts/prebuild",
     "start": "next start"
   },
   "version": "0.0.1"

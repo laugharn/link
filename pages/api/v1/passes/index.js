@@ -1,8 +1,11 @@
+import { handlePass } from '~/lib/mail'
 import { PrismaClient } from '@prisma/client'
 import { randomNumbers } from '~/lib/string'
 import { ttl } from '~/lib/time'
 
-const store = async ({ body }, res) => {
+const store = async (req, res) => {
+  const { body, headers } = req
+
   const { email, redirect = '/' } = body
 
   const prisma = new PrismaClient()
@@ -34,7 +37,7 @@ const store = async ({ body }, res) => {
   await prisma.$disconnect()
 
   if (process.env.NODE_ENV === 'production') {
-    // TODO: Send an Email
+    await handlePass(pass.code, email, headers)
   } else {
     console.log(pass.code)
   }
