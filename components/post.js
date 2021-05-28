@@ -13,18 +13,45 @@ import {
   WayfindingRemove,
 } from './wayfinding'
 
-const addToFilters = (addition = {}, filters = {}, config = {}) => {
+const addToFilters = (filters = {}, addition = {}, config = {}) => {
   const { removeKeys = [] } = config
 
+  const pathname = '/'
+  const query = omit(
+    {
+      ...filters,
+      ...addition,
+    },
+    removeKeys
+  )
+
+  // TODO: Revisit when we fully support users
+  // const pathname = query.user ? `/${query.user}` : '/'
+  //
+  // if (query.user) {
+  //   delete query.user
+  // }
+
   return {
-    pathname: '/',
-    query: omit(
-      {
-        ...filters,
-        ...addition,
-      },
-      removeKeys
-    ),
+    pathname,
+    query,
+  }
+}
+
+const removeFromFilters = (filters = {}, removeKeys = []) => {
+  const pathname = '/'
+  const query = omit(filters, removeKeys)
+
+  // TODO: Revisit when we fully support users
+  // const pathname = query.user ? `/${query.user}` : '/'
+  //
+  // if (query.user) {
+  //   delete query.user
+  // }
+
+  return {
+    pathname,
+    query,
   }
 }
 
@@ -39,35 +66,37 @@ const { Provider: PostProvider, useContainer: usePost } = createContainer(
   }
 )
 
-const Filters = ({ filters }) => {
+const Filters = ({ filters, nextTime, posts = [] }) => {
   const tags = filters.tag ? sortBy(filters.tag.split(','), (tag) => tag) : []
 
   return (
     <div className="bg-yellow-50 dark:bg-gray-900 leading-6 md:leading-10 p-2 text-gray-300 dark:text-gray-700 text-lg md:text-4xl w-full">
+      <Link href={addToFilters(filters)}>
+        <a className="text-gray-500 md:hover:text-blue-500">
+          {posts.length}
+          {nextTime ? ' ' : ' '}
+          {posts.length === 1 ? 'Link' : 'Links'}
+        </a>
+      </Link>
+      {' / '}
       <WayfindingAscending
-        href={`/?${stringify({
-          ...filters,
-          direction: 'asc',
-        })}`}
+        href={addToFilters(filters, { direction: 'asc' })}
         isActive={filters.direction === 'asc'}
       />
       <WayfindingDescending
-        href={`/?${stringify({
-          ...filters,
-          direction: 'desc',
-        })}`}
+        href={removeFromFilters(filters, ['direction'])}
         isActive={filters.direction !== 'asc'}
       />
       {filters.user && (
         <>
           {' / By '}
           <Link href={`/?user=${filters.user}`}>
-            <a className="break-words text-gray-500 md:hover:text-blue-500">
+            <a className="break-words text-black dark:text-white md:hover:text-blue-500">
               User No. {filters.user}
             </a>
           </Link>
           <WayfindingRemove
-            href={`/?${stringify(omit(filters, 'user'))}`}
+            href={removeFromFilters(filters, ['user'])}
             title="Remove user"
           />
         </>
@@ -80,7 +109,7 @@ const Filters = ({ filters }) => {
             timestamp={filters.createdAt}
           />
           <WayfindingRemove
-            href={`/?${stringify(omit(filters, 'createdAt'))}`}
+            href={removeFromFilters(filters, ['createdAt'])}
             title="Remove created at"
           />
         </>
@@ -94,7 +123,7 @@ const Filters = ({ filters }) => {
             </a>
           </Link>
           <WayfindingRemove
-            href={`/?${stringify(omit(filters, 'domain'))}`}
+            href={removeFromFilters(filters, ['domain'])}
             title="Remove domain"
           />
         </>
@@ -108,7 +137,7 @@ const Filters = ({ filters }) => {
             </a>
           </Link>
           <WayfindingRemove
-            href={`/?${stringify(omit(filters, 'host'))}`}
+            href={removeFromFilters(filters, ['host'])}
             title="Remove host"
           />
         </>
@@ -122,7 +151,7 @@ const Filters = ({ filters }) => {
             </a>
           </Link>
           <WayfindingRemove
-            href={`/?${stringify(omit(filters, 'url'))}`}
+            href={removeFromFilters(filters, ['url'])}
             title="Remove URL"
           />
         </>
@@ -132,14 +161,20 @@ const Filters = ({ filters }) => {
           {' / Tagged'}
           {tags.map((tag) => {
             return (
-              <span key={`tag-${tag}`}>
+              <Fragment key={`tag-${tag}`}>
                 {' '}
-                <Link href={`/?tag=${tag}`}>
-                  <a className="text-purple-300 dark:text-purple-800 md:hover:text-blue-500">
-                    {tag}
-                  </a>
-                </Link>
-              </span>
+                <Tag tag={tag} />
+                <WayfindingRemove
+                  href={
+                    tags.length === 1
+                      ? removeFromFilters(filters, ['tag'])
+                      : addToFilters(filters, {
+                          tag: tags.filter((t) => t !== tag).join(','),
+                        })
+                  }
+                  title="Remove tag"
+                />
+              </Fragment>
             )
           })}
         </>
@@ -169,12 +204,9 @@ const LinkData = () => {
         </a>
       </Link>
       <WayfindingAdd
-        href={addToFilters(
-          {
-            user: post.user.id,
-          },
-          filters
-        )}
+        href={addToFilters(filters, {
+          user: post.user.id,
+        })}
         title="Add user to query"
       />
       {' / Linked '}
@@ -183,10 +215,9 @@ const LinkData = () => {
         timestamp={post.createdAt}
       />
       <WayfindingAdd
-        href={addToFilters(
-          { createdAt: new Date(post?.createdAt).toISOString() },
-          filters
-        )}
+        href={addToFilters(filters, {
+          createdAt: new Date(post?.createdAt).toISOString(),
+        })}
         title="Add timestamp to query"
       />
       <LinkTags />
@@ -251,7 +282,7 @@ const LinkPostDescription = () => {
 export const LinkPosts = ({ filters, nextTime, posts }) => {
   return (
     <div className="w-full">
-      <Filters filters={filters} />
+      <Filters filters={filters} nextTime={nextTime} posts={posts} />
       <div className="md:space-y-4">
         {posts.length === 0 && (
           <div className="leading-6 md:leading-10 p-2 text-lg md:text-4xl text-gray-300 dark:text-gray-800">
@@ -281,16 +312,20 @@ const LinkPostTitle = () => {
     return (
       <li>
         <Link href={post.url.url}>
-          <a className="md:hover:text-blue-500" target="_blank" title={title}>
+          <a
+            className="text-blue-700 dark:text-blue-300 md:hover:text-blue-500"
+            target="_blank"
+            title={title}
+          >
             {title}
           </a>
         </Link>
         <WayfindingAdd
           href={addToFilters(
+            filters,
             {
               url: post.url.url,
             },
-            filters,
             {
               removeKeys: ['domain', 'host'],
             }
@@ -332,10 +367,10 @@ const LinkPostUrl = () => {
       </Link>
       <WayfindingAdd
         href={addToFilters(
+          filters,
           {
             host: post?.url.parsed.host,
           },
-          filters,
           {
             removeKeys: ['domain', 'url'],
           }
@@ -352,10 +387,10 @@ const LinkPostUrl = () => {
           </Link>
           <WayfindingAdd
             href={addToFilters(
+              filters,
               {
                 domain: post?.url.parsed.domain,
               },
-              filters,
               {
                 removeKeys: ['host', 'url'],
               }
@@ -381,14 +416,11 @@ const LinkTags = () => {
               {' '}
               <Tag tag={tag} />
               <WayfindingAdd
-                href={addToFilters(
-                  {
-                    tag: filters.tag
-                      ? uniq([...filters.tag.split(','), tag]).join(',')
-                      : tag,
-                  },
-                  filters
-                )}
+                href={addToFilters(filters, {
+                  tag: filters.tag
+                    ? uniq([...filters.tag.split(','), tag]).join(',')
+                    : tag,
+                })}
                 title="Add tag to query"
               />
             </Fragment>
@@ -432,7 +464,7 @@ const Tag = ({ tag }) => {
   return (
     <Link href={`/?tag=${tag}`}>
       <a
-        className="text-purple-300 dark:text-purple-800 md:hover:text-blue-500"
+        className="active:bg-transparent text-purple-500 md:hover:text-blue-500"
         title={`Go to tag "${tag}"`}
       >
         {tag}
