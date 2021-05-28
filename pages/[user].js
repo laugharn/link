@@ -6,7 +6,7 @@ const Page = ({ filters, nextTime, posts }) => {
   return (
     <>
       <Head>
-        <title>Home - Links</title>
+        <title>User No. {filters.user} - Links</title>
       </Head>
       <LinkPosts filters={filters} nextTime={nextTime} posts={posts} />
     </>
