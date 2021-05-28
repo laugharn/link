@@ -6,10 +6,9 @@
     "js-cookie": "2.2.1",
     "lodash": "4.17.21",
     "mailgun-js": "0.22.0",
-    "next": "10.2.2",
+    "next": "10.2.3",
     "next-iron-session": "4.1.13",
     "nprogress": "0.2.0",
-    "qs": "6.10.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "unstated-next": "1.1.0",
@@ -17,11 +16,11 @@
   },
   "devDependencies": {
     "@tailwindcss/forms": "0.3.2",
-    "autoprefixer": "10.2.5",
+    "autoprefixer": "10.2.6",
     "postcss": "8.3.0",
     "prisma": "2.23.0",
     "prop-types": "15.7.2",
-    "tailwindcss": "2.2.0-canary.9"
+    "tailwindcss": "2.2.0-canary.10"
   },
   "license": "UNLICENSED",
   "prettier": {
