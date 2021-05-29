@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import { reservedNames } from '~/lib/user'
 import { withSession } from '~/lib/session'
 
 const update = async (req, res) => {
@@ -16,6 +17,12 @@ const update = async (req, res) => {
   if (!name) {
     res.statusMessage = 'Unprocessable Entity'
     res.status(422).end()
+    return
+  }
+
+  if (reservedNames.includes(name)) {
+    res.statusMessage = 'Conflict'
+    res.status(409).end()
     return
   }
 
