@@ -1,6 +1,6 @@
 import { createContainer } from 'unstated-next'
 import { Fragment } from 'react'
-import { getTimestamp } from '../lib/time'
+import { humanTimeDiff } from '../lib/time'
 import Link from 'next/link'
 import { omit, uniq, sortBy } from 'lodash'
 import { useAuth } from '../containers/auth'
@@ -91,7 +91,7 @@ const Filters = ({ cursor, filters, posts = [] }) => {
           {' / By '}
           <Link href={`/?user=${filters.user}`}>
             <a className="break-words text-black dark:text-white md:hover:text-blue-500">
-              User No. {filters.user}
+              User #{filters.user}
             </a>
           </Link>
           <WayfindingRemove
@@ -105,7 +105,7 @@ const Filters = ({ cursor, filters, posts = [] }) => {
           {' / From '}
           <Link href={`/?cursor=${filters.cursor}`}>
             <a className="break-words text-gray-500 md:hover:text-blue-500">
-              No. {filters.cursor}
+              #{filters.cursor}
             </a>
           </Link>
           <WayfindingRemove
@@ -114,19 +114,6 @@ const Filters = ({ cursor, filters, posts = [] }) => {
           />
         </>
       )}
-      {/* {filters.createdAt && (
-        <>
-          {' / From '}
-          <Timestamp
-            href={`/?createdAt=${new Date(filters.createdAt).toISOString()}`}
-            timestamp={filters.createdAt}
-          />
-          <WayfindingRemove
-            href={removeFromFilters(filters, ['createdAt'])}
-            title="Remove created at"
-          />
-        </>
-      )} */}
       {filters.domain && (
         <>
           {' / On '}
@@ -210,10 +197,24 @@ const LinkData = () => {
           ↳
         </a>
       </Link>
+      {` / `}
+      <Link href={`/?cursor=${post.id}`}>
+        <a
+          className="text-gray-500 md:hover:text-blue-500"
+        >
+          #{post.id}
+        </a>
+      </Link>
+      <WayfindingAdd
+        href={addToFilters(filters, {
+          cursor: post.id,
+        })}
+        title="Add cursor to query"
+      />
       {` / By `}
       <Link href={`/?user=${post.user.id}`}>
         <a className="text-black dark:text-white md:hover:text-blue-500">
-          User No. {post.user.id}
+          User #{post.user.id}
         </a>
       </Link>
       <WayfindingAdd
@@ -222,7 +223,7 @@ const LinkData = () => {
         })}
         title="Add user to query"
       />
-      {` / Linked ${getTimestamp(post.createdAt)}`}
+      {` / Linked ${humanTimeDiff(post.createdAt)}`}
       {/* <Timestamp
         href={`/?createdAt=${new Date(post?.createdAt).toISOString()}`}
         timestamp={post.createdAt}
@@ -484,16 +485,6 @@ const Tag = ({ tag }) => {
         title={`Go to tag "${tag}"`}
       >
         {tag}
-      </a>
-    </Link>
-  )
-}
-
-const Timestamp = ({ href, timestamp }) => {
-  return (
-    <Link href={href}>
-      <a className="text-gray-500 md:hover:text-blue-500">
-        {getTimestamp(timestamp)}
       </a>
     </Link>
   )
