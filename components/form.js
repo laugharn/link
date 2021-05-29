@@ -11,9 +11,10 @@ import { useState } from 'react'
 
 const { Provider: StartFormProvider, useContainer: useStartForm } =
   createContainer(() => {
+    const [redirect, setRedirect] = useState()
     const [step, setStep] = useState('email')
 
-    return { setStep, step }
+    return { redirect, setRedirect, setStep, step }
   })
 
 export const FormCreate = () => {
@@ -131,13 +132,15 @@ export const FormStart = () => {
     <StartFormProvider>
       <FormStartEmail />
       <FormStartCode />
+      <FormStartProfile />
     </StartFormProvider>
   )
 }
 
 const FormStartCode = () => {
   const { login } = useAuth()
-  const { setStep, step } = useStartForm()
+  const { push } = useRouter()
+  const { setRedirect, setStep, step } = useStartForm()
 
   const [callback, setCallback] = useState()
 
@@ -163,7 +166,14 @@ const FormStartCode = () => {
             type: 'success',
           })
 
-          await login(user, redirect)
+          await login(user)
+
+          if (!user.name) {
+            setRedirect(redirect)
+            setStep('profile')
+          } else {
+            push(redirect)
+          }
         })
         .catch(() => {
           setCallback({
@@ -296,6 +306,90 @@ const FormStartEmail = () => {
               touched={form.touched.email}
               type="email"
               value={form.values.email}
+            />
+          </div>
+          <div className="p-2 w-full">
+            <ButtonSubmit disabled={disabled}>Submit</ButtonSubmit>
+          </div>
+        </form>
+      </div>
+    )
+  }
+
+  return null
+}
+
+const FormStartProfile = () => {
+  const { login } = useAuth()
+  const { push } = useRouter()
+  const { redirect, step } = useStartForm()
+
+  const [callback, setCallback] = useState()
+
+  const form = useFormik({
+    initialValues: {
+      name: '',
+    },
+    onSubmit: async (values) => {
+      setCallback()
+
+      await fetch('/api/v1/user', {
+        body: JSON.stringify(values),
+        headers: { 'Content-Type': 'application/json' },
+        method: 'PATCH',
+      })
+        .then(async (response) => {
+          if (!response.ok) {
+            throw Error(response.statusText)
+          }
+
+          const { user } = await response.json()
+
+          await login(user)
+
+          push(redirect)
+        })
+        .catch(() => {
+          setCallback({
+            message: 'This name is taken or reserved',
+            type: 'error',
+          })
+        })
+    },
+    validationSchema: object({
+      name: string()
+        .min(2, 'Too Short')
+        .max(16, 'Too Long')
+        .required('Required')
+        .matches(/^[a-z0-9]*$/, 'Invalid Character'),
+    }),
+  })
+
+  const disabled = [!form.dirty, form.isSubmitting, !form?.isValid].includes(
+    true
+  )
+
+  if (step === 'profile') {
+    return (
+      <div className="w-full">
+        {callback && <Callback callback={callback} />}
+        <div className="leading-6 md:leading-10 p-2 text-gray-700 dark:text-gray-300 text-lg md:text-4xl w-full">
+          You've successfully created a user, now you can add some personal
+          information, like a unique name.
+        </div>
+        <form onSubmit={form.handleSubmit}>
+          <div className="p-2 w-full">
+            <Input
+              autoCapitalize="none"
+              autoCorrect="off"
+              error={form.errors.name}
+              label="Name"
+              name="name"
+              onBlur={form.handleBlur}
+              onChange={form.handleChange}
+              placeholder="2-16 characters, lowercase or numbers"
+              touched={form.touched.name}
+              value={form.values.name}
             />
           </div>
           <div className="p-2 w-full">
