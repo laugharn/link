@@ -15,14 +15,7 @@ const Page = ({ post }) => (
   </>
 )
 
-export const getStaticPaths = () => {
-  return {
-    fallback: 'blocking',
-    paths: [],
-  }
-}
-
-export const getStaticProps = async ({ params }) => {
+export const getServerSideProps = async ({ params }) => {
   const response = await getLink(params)
 
   return response

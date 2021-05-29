@@ -36,7 +36,7 @@
     "db:reset": "yarn db:push --accept-data-loss --force-reset && yarn db:seed",
     "db:seed": "prisma db seed --preview-feature",
     "db:studio": "prisma studio",
-    "dev": "next",
+    "dev": "TZ=UTC next",
     "prebuild": "node scripts/prebuild",
     "start": "next start"
   },
