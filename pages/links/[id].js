@@ -23,21 +23,9 @@ export const getStaticPaths = () => {
 }
 
 export const getStaticProps = async ({ params }) => {
-  const post = await getLink(params)
+  const response = await getLink(params)
 
-  if (!post) {
-    return {
-      notFound: true,
-      revalidate: 1,
-    }
-  }
-
-  return {
-    props: {
-      post,
-    },
-    revalidate: 1,
-  }
+  return response
 }
 
 export default Page

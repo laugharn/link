@@ -3,7 +3,6 @@ import { Fragment } from 'react'
 import { getTimestamp } from '../lib/time'
 import Link from 'next/link'
 import { omit, uniq, sortBy } from 'lodash'
-import { stringify } from 'qs'
 import { useAuth } from '../containers/auth'
 import { useState } from 'react'
 import {
@@ -66,7 +65,7 @@ const { Provider: PostProvider, useContainer: usePost } = createContainer(
   }
 )
 
-const Filters = ({ filters, nextTime, posts = [] }) => {
+const Filters = ({ cursor, filters, posts = [] }) => {
   const tags = filters.tag ? sortBy(filters.tag.split(','), (tag) => tag) : []
 
   return (
@@ -74,7 +73,7 @@ const Filters = ({ filters, nextTime, posts = [] }) => {
       <Link href={addToFilters(filters)}>
         <a className="text-gray-500 md:hover:text-blue-500">
           {posts.length}
-          {nextTime ? ' ' : ' '}
+          {cursor ? ' ' : ' '}
           {posts.length === 1 ? 'Link' : 'Links'}
         </a>
       </Link>
@@ -101,7 +100,21 @@ const Filters = ({ filters, nextTime, posts = [] }) => {
           />
         </>
       )}
-      {filters.createdAt && (
+      {filters.cursor && (
+        <>
+          {' / From '}
+          <Link href={`/?cursor=${filters.cursor}`}>
+            <a className="break-words text-gray-500 md:hover:text-blue-500">
+              No. {filters.cursor}
+            </a>
+          </Link>
+          <WayfindingRemove
+            href={removeFromFilters(filters, ['cursor'])}
+            title="Remove cursor"
+          />
+        </>
+      )}
+      {/* {filters.createdAt && (
         <>
           {' / From '}
           <Timestamp
@@ -113,7 +126,7 @@ const Filters = ({ filters, nextTime, posts = [] }) => {
             title="Remove created at"
           />
         </>
-      )}
+      )} */}
       {filters.domain && (
         <>
           {' / On '}
@@ -209,8 +222,8 @@ const LinkData = () => {
         })}
         title="Add user to query"
       />
-      {' / Linked '}
-      <Timestamp
+      {` / Linked ${getTimestamp(post.createdAt)}`}
+      {/* <Timestamp
         href={`/?createdAt=${new Date(post?.createdAt).toISOString()}`}
         timestamp={post.createdAt}
       />
@@ -219,7 +232,7 @@ const LinkData = () => {
           createdAt: new Date(post?.createdAt).toISOString(),
         })}
         title="Add timestamp to query"
-      />
+      /> */}
       <LinkTags />
       {authenticated && user?.id === post.user.id && (
         <>
@@ -279,10 +292,10 @@ const LinkPostDescription = () => {
   return null
 }
 
-export const LinkPosts = ({ filters, nextTime, posts }) => {
+export const LinkPosts = ({ cursor, filters, posts }) => {
   return (
     <div className="w-full">
-      <Filters filters={filters} nextTime={nextTime} posts={posts} />
+      <Filters cursor={cursor} filters={filters} posts={posts} />
       <div className="md:space-y-4">
         {posts.length === 0 && (
           <div className="leading-6 md:leading-10 p-2 text-lg md:text-4xl text-gray-300 dark:text-gray-800">
@@ -297,7 +310,7 @@ export const LinkPosts = ({ filters, nextTime, posts }) => {
           )
         })}
       </div>
-      <Pagination filters={filters} nextTime={nextTime} />
+      <Pagination filters={filters} cursor={cursor} />
     </div>
   )
 }
@@ -433,19 +446,22 @@ const LinkTags = () => {
   return null
 }
 
-const Pagination = ({ filters, nextTime }) => {
-  if (!nextTime) {
+const Pagination = ({ filters, cursor }) => {
+  if (!cursor) {
     return null
   }
 
-  const query = {
-    ...filters,
-    createdAt: nextTime,
+  const href = {
+    pathname: '/',
+    query: {
+      ...filters,
+      cursor,
+    },
   }
 
   return (
     <div className="pb-2 pt-6 px-2 text-lg md:text-4xl">
-      <Link href={`/?${stringify(query)}`}>
+      <Link href={href}>
         <a className="text-blue-300 dark:text-blue-900 md:hover:text-blue-500">
           More Links
         </a>

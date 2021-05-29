@@ -1,5 +1,6 @@
 import { FormCreate } from '~/components/form'
 import { Head } from '~/components/head'
+import { Heading } from '~/components/heading'
 import { useAuth } from '~/containers/auth'
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
@@ -19,9 +20,7 @@ const Page = () => {
       <Head>
         <title>Create - Links</title>
       </Head>
-      <div className="bg-yellow-50 dark:bg-gray-900 leading-6 md:leading-10 p-2 text-gray-300 dark:text-gray-700 text-lg md:text-4xl w-full">
-        Create a Link
-      </div>
+      <Heading href="/create">Create a Link</Heading>
       {authenticated && <FormCreate />}
     </div>
   )

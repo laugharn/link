@@ -2,24 +2,22 @@ import { getLinks } from '~/lib/post'
 import { Head } from '~/components/head'
 import { LinkPosts } from '~/components/post'
 
-const Page = ({ filters, nextTime, posts }) => {
+const Page = ({ cursor, filters, posts }) => {
   return (
     <>
       <Head>
         <title>Home - Links</title>
       </Head>
-      <LinkPosts filters={filters} nextTime={nextTime} posts={posts} />
+      <LinkPosts cursor={cursor} filters={filters} posts={posts} />
     </>
   )
 }
 
 export const getServerSideProps = async ({ query }) => {
   try {
-    const props = await getLinks(query)
+    const response = await getLinks(query)
 
-    return {
-      props,
-    }
+    return response
   } catch (error) {
     return {
       notFound: true,
