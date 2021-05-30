@@ -1,4 +1,4 @@
-import { getLinks } from '~/lib/post'
+import { getPosts } from '~/lib/post'
 import { Head } from '~/components/head'
 import { LinkPosts } from '~/components/post'
 
@@ -15,7 +15,7 @@ const Page = ({ cursor, filters, posts }) => {
 
 export const getServerSideProps = async ({ query }) => {
   try {
-    const response = await getLinks(query)
+    const response = await getPosts(query)
 
     return response
   } catch (error) {

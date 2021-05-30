@@ -14,7 +14,7 @@ export const Nav = () => {
             className="text-black dark:text-white md:hover:text-blue-500"
             title="Links"
           >
-            Link
+            Links
           </a>
         </Link>
         {' / '}
