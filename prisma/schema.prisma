@@ -64,6 +64,7 @@ model User {
     id        Int      @id @default(autoincrement())
     // Fields
     email     String   @unique
+    name      String?
     version   Int      @default(1)
     // Relations
     passes    Pass[]

@@ -1,7 +1,7 @@
 import { authCookieName, userCookieName } from '../lib/session'
 import Cookie from 'js-cookie'
 import { createContainer } from 'unstated-next'
-import { pick } from 'lodash'
+import { isFinite, pick } from 'lodash'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 
@@ -24,18 +24,19 @@ const useContainer = () => {
     }
   }, [asPath])
 
-  const login = async (data, redirect = '/create') => {
-    const userData = pick(data, ['email', 'id'])
+  const login = async (data) => {
+    const userData = pick(data, ['email', 'id', 'name'])
 
     setAuthenticated(true)
     setUser(userData)
 
     Cookie.set(userCookieName, userData)
-
-    push(redirect)
   }
 
   const logout = async () => {
+    setAuthenticated(false)
+    setUser({})
+
     Cookie.remove(authCookieName)
     Cookie.remove(userCookieName)
 

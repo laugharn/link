@@ -1,8 +1,8 @@
 import { createContainer } from 'unstated-next'
 import { Fragment } from 'react'
 import { humanTimeDiff } from '../lib/time'
+import { isFinite, omit, uniq, sortBy } from 'lodash'
 import Link from 'next/link'
-import { omit, uniq, sortBy } from 'lodash'
 import { useAuth } from '../containers/auth'
 import { useState } from 'react'
 import {
@@ -67,6 +67,7 @@ const { Provider: PostProvider, useContainer: usePost } = createContainer(
 
 const Filters = ({ cursor, filters, posts = [] }) => {
   const tags = filters.tag ? sortBy(filters.tag.split(','), (tag) => tag) : []
+  const filtersUser = filters.user ? isFinite(parseInt(filters.user)) ? parseInt(filters.user) : filters.user : null
 
   return (
     <div className="bg-yellow-50 dark:bg-gray-900 leading-6 md:leading-10 p-2 text-gray-300 dark:text-gray-700 text-lg md:text-4xl w-full">
@@ -91,7 +92,7 @@ const Filters = ({ cursor, filters, posts = [] }) => {
           {' / By '}
           <Link href={`/?user=${filters.user}`}>
             <a className="break-words text-black dark:text-white md:hover:text-blue-500">
-              User #{filters.user}
+            {typeof filtersUser === 'string' ? filtersUser : `User #${filtersUser}`}
             </a>
           </Link>
           <WayfindingRemove
@@ -187,6 +188,8 @@ const LinkData = () => {
   const { authenticated, user } = useAuth()
   const { filters, isDeleting, post, setIsDeleted, setIsDeleting } = usePost()
 
+  const postUser = post.user.name ?? post.user.id
+
   return (
     <li className="text-gray-300 dark:text-gray-700">
       <Link href={`/links/${post.id}`}>
@@ -199,11 +202,7 @@ const LinkData = () => {
       </Link>
       {` / `}
       <Link href={`/?cursor=${post.id}`}>
-        <a
-          className="text-gray-500 md:hover:text-blue-500"
-        >
-          #{post.id}
-        </a>
+        <a className="text-gray-500 md:hover:text-blue-500">#{post.id}</a>
       </Link>
       <WayfindingAdd
         href={addToFilters(filters, {
@@ -212,9 +211,9 @@ const LinkData = () => {
         title="Add cursor to query"
       />
       {` / By `}
-      <Link href={`/?user=${post.user.id}`}>
+      <Link href={`/?user=${postUser}`}>
         <a className="text-black dark:text-white md:hover:text-blue-500">
-          User #{post.user.id}
+          {typeof postUser === 'string' ? postUser : `User #${postUser}`}
         </a>
       </Link>
       <WayfindingAdd
@@ -224,16 +223,6 @@ const LinkData = () => {
         title="Add user to query"
       />
       {` / Linked ${humanTimeDiff(post.createdAt)}`}
-      {/* <Timestamp
-        href={`/?createdAt=${new Date(post?.createdAt).toISOString()}`}
-        timestamp={post.createdAt}
-      />
-      <WayfindingAdd
-        href={addToFilters(filters, {
-          createdAt: new Date(post?.createdAt).toISOString(),
-        })}
-        title="Add timestamp to query"
-      /> */}
       <LinkTags />
       {authenticated && user?.id === post.user.id && (
         <>
