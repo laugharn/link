@@ -61,7 +61,7 @@ const { Provider: PostProvider, useContainer: usePost } = createContainer(
   }
 )
 
-const Filters = ({ context, cursor, filters, posts = [] }) => {
+const Filters = ({ cursor, filters, posts = [] }) => {
   const tags = filters.tag ? sortBy(filters.tag.split(','), (tag) => tag) : []
   const filtersUser = filters.user
     ? isFinite(parseInt(filters.user))
@@ -71,12 +71,10 @@ const Filters = ({ context, cursor, filters, posts = [] }) => {
 
   return (
     <div
-      className={`${
-        context === 'user' ? 'bg-pink-50' : 'bg-yellow-50'
-      } dark:bg-gray-900 leading-6 md:leading-10 p-2 text-gray-300 dark:text-gray-700 text-lg md:text-4xl w-full`}
+      className={`bg-gray-500 leading-6 md:leading-10 p-2 text-gray-700 text-lg md:text-4xl w-full`}
     >
       <Link href={addToFilters(filters)}>
-        <a className="text-gray-500 md:hover:text-blue-500">
+        <a className="text-gray-300 md:hover:text-blue-500">
           {posts.length}
           {cursor ? ' ' : ' '}
           {posts.length === 1 ? 'Link' : 'Links'}
@@ -95,7 +93,7 @@ const Filters = ({ context, cursor, filters, posts = [] }) => {
         <>
           {' / From '}
           <Link href={`/?cursor=${filters.cursor}`}>
-            <a className="break-words text-gray-500 md:hover:text-blue-500">
+            <a className="break-words text-gray-300 md:hover:text-blue-500">
               #{filters.cursor}
             </a>
           </Link>
@@ -109,7 +107,7 @@ const Filters = ({ context, cursor, filters, posts = [] }) => {
         <>
           {' / On '}
           <Link href={`/?domain=${filters.domain}`}>
-            <a className="break-words text-gray-500 md:hover:text-blue-500">
+            <a className="break-words text-gray-300 md:hover:text-blue-500">
               {filters.domain}
             </a>
           </Link>
@@ -123,7 +121,7 @@ const Filters = ({ context, cursor, filters, posts = [] }) => {
         <>
           {' / On '}
           <Link href={`/?host=${filters.host}`}>
-            <a className="break-words text-gray-500 md:hover:text-blue-500">
+            <a className="break-words text-gray-300 md:hover:text-blue-500">
               {filters.host}
             </a>
           </Link>
@@ -137,7 +135,7 @@ const Filters = ({ context, cursor, filters, posts = [] }) => {
         <>
           {' / At '}
           <Link href={`/?url=${filters.url}`}>
-            <a className="break-words text-gray-500 md:hover:text-blue-500">
+            <a className="break-words text-gray-300 md:hover:text-blue-500">
               {filters.url}
             </a>
           </Link>
@@ -154,7 +152,7 @@ const Filters = ({ context, cursor, filters, posts = [] }) => {
             return (
               <Fragment key={`tag-${tag}`}>
                 {' '}
-                <Tag tag={tag} />
+                <Tag context="filters" tag={tag} />
                 <WayfindingRemove
                   href={
                     tags.length === 1
@@ -439,7 +437,7 @@ const Pagination = ({ filters, cursor }) => {
   return (
     <div className="pb-2 pt-6 px-2 text-lg md:text-4xl">
       <Link href={addToFilters(filters, { cursor })}>
-        <a className="text-blue-300 dark:text-blue-900 md:hover:text-blue-500">
+        <a className="text-cyan-500 md:hover:text-blue-500">
           More Links
         </a>
       </Link>
@@ -453,11 +451,11 @@ export const Post = ({ children, filters, post }) => {
   )
 }
 
-const Tag = ({ tag }) => {
+const Tag = ({ context, tag }) => {
   return (
     <Link href={`/?tag=${tag}`}>
       <a
-        className="active:bg-transparent text-purple-500 md:hover:text-blue-500"
+        className={`${context === 'filters' ? 'text-purple-300' : 'text-purple-500'} md:hover:text-blue-500`}
         title={`Go to tag "${tag}"`}
       >
         {tag}
