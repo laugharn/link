@@ -4,7 +4,7 @@ import { memo } from 'react'
 export const WayfindingAdd = memo(({ href, ...props }) => (
   <Link href={href}>
     <a
-      className="text-teal-300 dark:text-teal-700 md:hover:text-blue-500"
+      className="ml-0.5 md:ml-0 text-teal-300 dark:text-teal-700 md:hover:text-blue-500"
       {...props}
     >
       ↗
@@ -45,7 +45,7 @@ export const WayfindingDescending = memo(({ href, isActive, ...props }) => (
 export const WayfindingRemove = memo(({ href, ...props }) => (
   <Link href={href}>
     <a
-      className="text-rose-700 md:hover:text-blue-500"
+      className="ml-0.5 md:ml-0 text-rose-700 md:hover:text-blue-500"
       {...props}
     >
       ↘

@@ -53,9 +53,9 @@ export const FormCreate = () => {
             type: 'success',
           })
 
-          push(`/links/${post.id}`)
+          push(`/${post.user.name}/links/${post.id}`)
         })
-        .catch((error) => {
+        .catch(() => {
           setCallback({
             message: 'Uh oh, something went wrong!',
             type: 'error',
@@ -168,7 +168,7 @@ const FormStartCode = () => {
 
           await login(user)
 
-          if (!user.name) {
+          if (user.name.startsWith('user') || !user.name) {
             setRedirect(redirect)
             setStep('profile')
           } else {

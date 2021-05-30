@@ -180,7 +180,7 @@ const LinkData = () => {
 
   return (
     <li className="text-gray-300 dark:text-gray-700">
-      <Link href={`/links/${post.id}`}>
+      <Link href={`/${post.user.name ?? post.user.id}/links/${post.id}`}>
         <a
           className="text-black dark:text-white md:hover:text-blue-500"
           title="Go to Link"
