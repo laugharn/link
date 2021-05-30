@@ -7,14 +7,14 @@ export const Nav = () => {
   const { push } = useRouter()
 
   return (
-    <div className="bg-yellow-100 dark:bg-gray-800 flex justify-between leading-6 md:leading-10 p-2 text-gray-300 dark:text-gray-700 text-lg md:text-4xl w-full">
+    <div className="bg-black dark:bg-white flex justify-between leading-6 md:leading-10 p-2 text-gray-700 dark:text-gray-300 text-lg md:text-4xl w-full">
       <div>
         <Link href="/">
           <a
-            className="text-black dark:text-white md:hover:text-blue-500"
+            className="text-white dark:text-black md:hover:text-blue-500"
             title="Links"
           >
-            Link
+            Links
           </a>
         </Link>
         {' / '}
@@ -27,18 +27,18 @@ export const Nav = () => {
       <div>
         {authenticated && user.id && (
           <button
-            className="text-black dark:text-white md:hover:text-blue-500"
+            className="text-white dark:text-black md:hover:text-blue-500"
             onClick={() => {
-              push(`/?user=${user.name ?? user.id}`)
+              push(`/${user.name}`)
             }}
           >
-            {user.name ?? `User #${user.id}`}
+            {user.name}
           </button>
         )}
         {authenticated === false && (
           <Link href="/start">
             <a
-              className="text-black dark:text-white md:hover:text-blue-500"
+              className="text-white dark:text-black md:hover:text-blue-500"
               title="Start"
             >
               Start

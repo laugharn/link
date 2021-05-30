@@ -15,7 +15,6 @@ import {
 const addToFilters = (filters = {}, addition = {}, config = {}) => {
   const { removeKeys = [] } = config
 
-  const pathname = '/'
   const query = omit(
     {
       ...filters,
@@ -24,12 +23,11 @@ const addToFilters = (filters = {}, addition = {}, config = {}) => {
     removeKeys
   )
 
-  // TODO: Revisit when we fully support users
-  // const pathname = query.user ? `/${query.user}` : '/'
-  //
-  // if (query.user) {
-  //   delete query.user
-  // }
+  const pathname = query.user ? `/${query.user}` : '/'
+
+  if (query.user) {
+    delete query.user
+  }
 
   return {
     pathname,
@@ -37,16 +35,14 @@ const addToFilters = (filters = {}, addition = {}, config = {}) => {
   }
 }
 
-const removeFromFilters = (filters = {}, removeKeys = []) => {
-  const pathname = '/'
+export const removeFromFilters = (filters = {}, removeKeys = []) => {
   const query = omit(filters, removeKeys)
 
-  // TODO: Revisit when we fully support users
-  // const pathname = query.user ? `/${query.user}` : '/'
-  //
-  // if (query.user) {
-  //   delete query.user
-  // }
+  const pathname = query.user ? `/${query.user}` : '/'
+
+  if (query.user) {
+    delete query.user
+  }
 
   return {
     pathname,
@@ -67,12 +63,13 @@ const { Provider: PostProvider, useContainer: usePost } = createContainer(
 
 const Filters = ({ cursor, filters, posts = [] }) => {
   const tags = filters.tag ? sortBy(filters.tag.split(','), (tag) => tag) : []
-  const filtersUser = filters.user ? isFinite(parseInt(filters.user)) ? parseInt(filters.user) : filters.user : null
 
   return (
-    <div className="bg-yellow-50 dark:bg-gray-900 leading-6 md:leading-10 p-2 text-gray-300 dark:text-gray-700 text-lg md:text-4xl w-full">
+    <div
+      className={`bg-gray-500 leading-6 md:leading-10 p-2 text-gray-700 text-lg md:text-4xl w-full`}
+    >
       <Link href={addToFilters(filters)}>
-        <a className="text-gray-500 md:hover:text-blue-500">
+        <a className="text-gray-300 md:hover:text-blue-500">
           {posts.length}
           {cursor ? ' ' : ' '}
           {posts.length === 1 ? 'Link' : 'Links'}
@@ -87,25 +84,11 @@ const Filters = ({ cursor, filters, posts = [] }) => {
         href={removeFromFilters(filters, ['direction'])}
         isActive={filters.direction !== 'asc'}
       />
-      {filters.user && (
-        <>
-          {' / By '}
-          <Link href={`/?user=${filters.user}`}>
-            <a className="break-words text-black dark:text-white md:hover:text-blue-500">
-            {typeof filtersUser === 'string' ? filtersUser : `User #${filtersUser}`}
-            </a>
-          </Link>
-          <WayfindingRemove
-            href={removeFromFilters(filters, ['user'])}
-            title="Remove user"
-          />
-        </>
-      )}
       {filters.cursor && (
         <>
           {' / From '}
           <Link href={`/?cursor=${filters.cursor}`}>
-            <a className="break-words text-gray-500 md:hover:text-blue-500">
+            <a className="break-words text-gray-300 md:hover:text-blue-500">
               #{filters.cursor}
             </a>
           </Link>
@@ -119,7 +102,7 @@ const Filters = ({ cursor, filters, posts = [] }) => {
         <>
           {' / On '}
           <Link href={`/?domain=${filters.domain}`}>
-            <a className="break-words text-gray-500 md:hover:text-blue-500">
+            <a className="break-words text-gray-300 md:hover:text-blue-500">
               {filters.domain}
             </a>
           </Link>
@@ -133,7 +116,7 @@ const Filters = ({ cursor, filters, posts = [] }) => {
         <>
           {' / On '}
           <Link href={`/?host=${filters.host}`}>
-            <a className="break-words text-gray-500 md:hover:text-blue-500">
+            <a className="break-words text-gray-300 md:hover:text-blue-500">
               {filters.host}
             </a>
           </Link>
@@ -147,7 +130,7 @@ const Filters = ({ cursor, filters, posts = [] }) => {
         <>
           {' / At '}
           <Link href={`/?url=${filters.url}`}>
-            <a className="break-words text-gray-500 md:hover:text-blue-500">
+            <a className="break-words text-gray-300 md:hover:text-blue-500">
               {filters.url}
             </a>
           </Link>
@@ -164,7 +147,7 @@ const Filters = ({ cursor, filters, posts = [] }) => {
             return (
               <Fragment key={`tag-${tag}`}>
                 {' '}
-                <Tag tag={tag} />
+                <Tag context="filters" tag={tag} />
                 <WayfindingRemove
                   href={
                     tags.length === 1
@@ -188,11 +171,9 @@ const LinkData = () => {
   const { authenticated, user } = useAuth()
   const { filters, isDeleting, post, setIsDeleted, setIsDeleting } = usePost()
 
-  const postUser = post.user.name ?? post.user.id
-
   return (
     <li className="text-gray-300 dark:text-gray-700">
-      <Link href={`/links/${post.id}`}>
+      <Link href={`/${post.user.name}/links/${post.id}`}>
         <a
           className="text-black dark:text-white md:hover:text-blue-500"
           title="Go to Link"
@@ -211,14 +192,14 @@ const LinkData = () => {
         title="Add cursor to query"
       />
       {` / By `}
-      <Link href={`/?user=${postUser}`}>
+      <Link href={`/${post.user.name}`}>
         <a className="text-black dark:text-white md:hover:text-blue-500">
-          {typeof postUser === 'string' ? postUser : `User #${postUser}`}
+          {post.user.name}
         </a>
       </Link>
       <WayfindingAdd
         href={addToFilters(filters, {
-          user: post.user.id,
+          user: post.user.name,
         })}
         title="Add user to query"
       />
@@ -282,10 +263,15 @@ const LinkPostDescription = () => {
   return null
 }
 
-export const LinkPosts = ({ cursor, filters, posts }) => {
+export const LinkPosts = ({ context, cursor, filters, posts }) => {
   return (
     <div className="w-full">
-      <Filters cursor={cursor} filters={filters} posts={posts} />
+      <Filters
+        context={context}
+        cursor={cursor}
+        filters={filters}
+        posts={posts}
+      />
       <div className="md:space-y-4">
         {posts.length === 0 && (
           <div className="leading-6 md:leading-10 p-2 text-lg md:text-4xl text-gray-300 dark:text-gray-800">
@@ -441,20 +427,10 @@ const Pagination = ({ filters, cursor }) => {
     return null
   }
 
-  const href = {
-    pathname: '/',
-    query: {
-      ...filters,
-      cursor,
-    },
-  }
-
   return (
     <div className="pb-2 pt-6 px-2 text-lg md:text-4xl">
-      <Link href={href}>
-        <a className="text-blue-300 dark:text-blue-900 md:hover:text-blue-500">
-          More Links
-        </a>
+      <Link href={addToFilters(filters, { cursor })}>
+        <a className="text-cyan-500 md:hover:text-blue-500">More Links</a>
       </Link>
     </div>
   )
@@ -466,11 +442,13 @@ export const Post = ({ children, filters, post }) => {
   )
 }
 
-const Tag = ({ tag }) => {
+const Tag = ({ context, tag }) => {
   return (
     <Link href={`/?tag=${tag}`}>
       <a
-        className="active:bg-transparent text-purple-500 md:hover:text-blue-500"
+        className={`${
+          context === 'filters' ? 'text-purple-300' : 'text-purple-500'
+        } md:hover:text-blue-500`}
         title={`Go to tag "${tag}"`}
       >
         {tag}
