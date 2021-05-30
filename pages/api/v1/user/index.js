@@ -20,7 +20,7 @@ const update = async (req, res) => {
     return
   }
 
-  if (name.startsWith('user') ?? reservedNames.includes(name)) {
+  if (name.startsWith('user') || reservedNames.includes(name)) {
     res.statusMessage = 'Conflict'
     res.status(409).end()
     return

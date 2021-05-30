@@ -63,11 +63,6 @@ const { Provider: PostProvider, useContainer: usePost } = createContainer(
 
 const Filters = ({ cursor, filters, posts = [] }) => {
   const tags = filters.tag ? sortBy(filters.tag.split(','), (tag) => tag) : []
-  const filtersUser = filters.user
-    ? isFinite(parseInt(filters.user))
-      ? parseInt(filters.user)
-      : filters.user
-    : null
 
   return (
     <div
@@ -176,11 +171,9 @@ const LinkData = () => {
   const { authenticated, user } = useAuth()
   const { filters, isDeleting, post, setIsDeleted, setIsDeleting } = usePost()
 
-  const postUser = post.user.name ?? post.user.id
-
   return (
     <li className="text-gray-300 dark:text-gray-700">
-      <Link href={`/${post.user.name ?? post.user.id}/links/${post.id}`}>
+      <Link href={`/${post.user.name}/links/${post.id}`}>
         <a
           className="text-black dark:text-white md:hover:text-blue-500"
           title="Go to Link"
@@ -199,14 +192,14 @@ const LinkData = () => {
         title="Add cursor to query"
       />
       {` / By `}
-      <Link href={`/${post.user.name ?? post.user.id}`}>
+      <Link href={`/${post.user.name}`}>
         <a className="text-black dark:text-white md:hover:text-blue-500">
-          {post.user.name ?? `User #${post.user.id}`}
+          {post.user.name}
         </a>
       </Link>
       <WayfindingAdd
         href={addToFilters(filters, {
-          user: post.user.name ?? post.user.id,
+          user: post.user.name,
         })}
         title="Add user to query"
       />
@@ -437,9 +430,7 @@ const Pagination = ({ filters, cursor }) => {
   return (
     <div className="pb-2 pt-6 px-2 text-lg md:text-4xl">
       <Link href={addToFilters(filters, { cursor })}>
-        <a className="text-cyan-500 md:hover:text-blue-500">
-          More Links
-        </a>
+        <a className="text-cyan-500 md:hover:text-blue-500">More Links</a>
       </Link>
     </div>
   )
@@ -455,7 +446,9 @@ const Tag = ({ context, tag }) => {
   return (
     <Link href={`/?tag=${tag}`}>
       <a
-        className={`${context === 'filters' ? 'text-purple-300' : 'text-purple-500'} md:hover:text-blue-500`}
+        className={`${
+          context === 'filters' ? 'text-purple-300' : 'text-purple-500'
+        } md:hover:text-blue-500`}
         title={`Go to tag "${tag}"`}
       >
         {tag}

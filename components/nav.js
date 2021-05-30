@@ -29,10 +29,10 @@ export const Nav = () => {
           <button
             className="text-white dark:text-black md:hover:text-blue-500"
             onClick={() => {
-              push(`/?user=${user.name ?? user.id}`)
+              push(`/${user.name}`)
             }}
           >
-            {user.name ?? `User #${user.id}`}
+            {user.name}
           </button>
         )}
         {authenticated === false && (
