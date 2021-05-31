@@ -1,29 +1,37 @@
 import { FormCreate } from '~/components/form'
 import { Head } from '~/components/head'
 import { Heading } from '~/components/heading'
-import { useAuth } from '~/containers/auth'
-import { useEffect } from 'react'
-import { useRouter } from 'next/router'
+import { withSession } from '~/lib/session'
 
 const Page = () => {
-  const { authenticated } = useAuth()
-  const { push } = useRouter()
-
-  useEffect(() => {
-    if (authenticated === false) {
-      push(`/start?redirect=/create`)
-    }
-  }, [authenticated])
-
   return (
     <div className="w-full">
       <Head>
         <title>Create - Links</title>
       </Head>
       <Heading href="/create">Create a Link</Heading>
-      {authenticated && <FormCreate />}
+      <FormCreate />
     </div>
   )
 }
+
+export const getServerSideProps = withSession(async ({ req }) => {
+  const { session } = req
+
+  const id = session.get('id')
+
+  if (!id) {
+    return {
+      redirect: {
+        destination: '/start?redirect=/create',
+        permanent: false,
+      },
+    }
+  }
+
+  return {
+    props: {},
+  }
+})
 
 export default Page

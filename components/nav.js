@@ -25,7 +25,7 @@ export const Nav = () => {
         </Link>
       </div>
       <div>
-        {authenticated && user.id && (
+        {authenticated && user?.id && (
           <button
             className="text-white dark:text-black md:hover:text-blue-500"
             onClick={() => {
