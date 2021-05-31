@@ -191,7 +191,7 @@ const LinkData = () => {
         })}
         title="Add cursor to query"
       />
-      {` / By `}
+      {` / `}
       <Link href={`/${post.user.name}`}>
         <a className="text-black dark:text-white md:hover:text-blue-500">
           {post.user.name}
@@ -203,7 +203,7 @@ const LinkData = () => {
         })}
         title="Add user to query"
       />
-      {` / Linked ${humanTimeDiff(post.createdAt)}`}
+      {` / ${humanTimeDiff(post.createdAt)}`}
       <LinkTags />
       {authenticated && user?.id === post.user.id && (
         <>
@@ -398,7 +398,7 @@ const LinkTags = () => {
   if (post.tags.length > 0) {
     return (
       <>
-        {' / Tagged'}
+        {' / '}
         {sortBy(post.tags, (tag) => tag).map((tag) => {
           return (
             <Fragment key={`post-${post.id}-tag-${tag}`}>

@@ -4,6 +4,7 @@ import { createContainer } from 'unstated-next'
 import { Input } from './input'
 import { kebabCase } from 'lodash'
 import { object, string } from 'yup'
+import { TextareaForm } from './textarea'
 import { useApp } from '../containers/app'
 import { useAuth } from '../containers/auth'
 import { useFormik } from 'formik'
@@ -129,6 +130,99 @@ export const FormCreate = () => {
           />
         </div>
         <div className="p-2">
+          <ButtonSubmit disabled={disabled}>Submit</ButtonSubmit>
+        </div>
+      </form>
+    </div>
+  )
+}
+
+export const FormProfile = ({ user }) => {
+  const { setProcessing } = useApp()
+
+  const [callback, setCallback] = useState()
+
+  const form = useFormik({
+    initialValues: {
+      description: user.description ?? '',
+      name: user.name,
+    },
+    onSubmit: async (values) => {
+      setProcessing(true)
+      setCallback()
+
+      await fetch('/api/v1/user', {
+        body: JSON.stringify(values),
+        headers: { 'Content-Type': 'application/json' },
+        method: 'PATCH',
+      })
+        .then(async (response) => {
+          setProcessing(false)
+
+          if (!response.ok) {
+            throw Error(response.statusText)
+          }
+
+          setCallback({
+            message: 'Successfully updated your profile',
+            type: 'success',
+          })
+        })
+        .catch(() => {
+          setCallback({
+            message: 'This name is taken or reserved',
+            type: 'error',
+          })
+        })
+    },
+    validationSchema: object({
+      description: string().max(140, 'Too Long'),
+      name: string()
+        .min(2, 'Too Short')
+        .max(16, 'Too Long')
+        .required('Required')
+        .matches(/^[a-z0-9]*$/, 'Invalid Character'),
+    }),
+  })
+
+  const disabled = [!form.dirty, form.isSubmitting, !form?.isValid].includes(
+    true
+  )
+
+  return (
+    <div className="w-full">
+      {callback && <Callback callback={callback} />}
+      <form onSubmit={form.handleSubmit}>
+        <div className="p-2 w-full">
+          <Input
+            autoCapitalize="none"
+            autoCorrect="off"
+            error={form.errors.name}
+            label="Name"
+            name="name"
+            onBlur={form.handleBlur}
+            onChange={form.handleChange}
+            placeholder="2-16 characters, lowercase or numbers"
+            touched={form.touched.name}
+            value={form.values.name}
+          />
+        </div>
+        <div className="p-2 w-full">
+          <TextareaForm
+            autoCapitalize="none"
+            autoCorrect="off"
+            error={form.errors.description}
+            id="description"
+            label="Description"
+            name="description"
+            onBlur={form.handleBlur}
+            onChange={form.handleChange}
+            placeholder="140 characters, max"
+            touched={form.touched.description}
+            value={form.values.description}
+          />
+        </div>
+        <div className="p-2 w-full">
           <ButtonSubmit disabled={disabled}>Submit</ButtonSubmit>
         </div>
       </form>
@@ -345,6 +439,7 @@ const FormStartProfile = () => {
 
   const form = useFormik({
     initialValues: {
+      description: '',
       name: '',
     },
     onSubmit: async (values) => {
@@ -377,6 +472,7 @@ const FormStartProfile = () => {
         })
     },
     validationSchema: object({
+      description: string().max(140, 'Too Long'),
       name: string()
         .min(2, 'Too Short')
         .max(16, 'Too Long')
@@ -410,6 +506,21 @@ const FormStartProfile = () => {
               placeholder="2-16 characters, lowercase or numbers"
               touched={form.touched.name}
               value={form.values.name}
+            />
+          </div>
+          <div className="p-2 w-full">
+            <TextareaForm
+              autoCapitalize="none"
+              autoCorrect="off"
+              error={form.errors.description}
+              id="description"
+              label="Description"
+              name="description"
+              onBlur={form.handleBlur}
+              onChange={form.handleChange}
+              placeholder="140 characters, max"
+              touched={form.touched.description}
+              value={form.values.description}
             />
           </div>
           <div className="p-2 w-full">

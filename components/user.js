@@ -16,6 +16,10 @@ export const UserHeading = ({ context, filters = {}, user }) => {
           title="Remove user"
         />
       )}
+      {user.description && <>
+      {' / '}
+      {user.description}
+      </>}
     </div>
   )
 }

@@ -25,6 +25,7 @@ const store = async (req, res) => {
           create: {
             createdAt: date,
             email,
+            types: ['user'],
           },
           where: {
             email,
@@ -34,17 +35,17 @@ const store = async (req, res) => {
     },
     include: {
       user: true,
-    }
+    },
   })
 
   if (!pass.user.name) {
     await prisma.user.update({
       data: {
-        name: `user${pass.user.id}`
+        name: `user${pass.user.id}`,
       },
       where: {
         id: pass.user.id,
-      }
+      },
     })
   }
 
