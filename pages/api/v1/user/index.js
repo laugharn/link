@@ -2,6 +2,39 @@ import { PrismaClient } from '@prisma/client'
 import { reservedNames } from '~/lib/user'
 import { withSession } from '~/lib/session'
 
+const show = async (req, res) => {
+  const { session } = req
+
+  const id = session.get('id')
+
+  if (!id) {
+    res.statusMessage = 'Unauthorized'
+    res.status(401).end()
+    return
+  }
+
+  const prisma = new PrismaClient()
+  await prisma.$connect()
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id,
+      },
+    })
+
+    await prisma.$disconnect()
+
+    res.json({ user })
+  } catch (error) {
+    await prisma.$disconnect()
+
+    res.statusMessage = 'Bad Request'
+    res.status(400).end()
+    return
+  }
+}
+
 const update = async (req, res) => {
   const { body, session } = req
 
@@ -67,7 +100,9 @@ const update = async (req, res) => {
 const handler = async (req, res) => {
   const { method } = req
 
-  if (method === 'PATCH') {
+  if (method === 'GET') {
+    await show(req, res)
+  } else if (method === 'PATCH') {
     await update(req, res)
   } else {
     res.statusMessage = 'Method Not Allowed'

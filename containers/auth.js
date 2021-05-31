@@ -1,7 +1,7 @@
-import { authCookieName, userCookieName } from '../lib/session'
+import { authCookieName } from '../lib/session'
 import Cookie from 'js-cookie'
 import { createContainer } from 'unstated-next'
-import { isFinite, pick } from 'lodash'
+import { pick } from 'lodash'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 
@@ -15,22 +15,30 @@ const useContainer = () => {
     const auth = Boolean(Cookie.get(authCookieName))
 
     if (auth) {
-      const data = Cookie.getJSON(userCookieName)
-
-      setUser(data)
       setAuthenticated(true)
     } else {
+      setUser({})
       setAuthenticated(false)
     }
   }, [asPath])
+
+  useEffect(() => {
+    if (authenticated) {
+      fetch('/api/v1/user').then(async (response) => {
+        const data = await response.json()
+  
+        setUser(pick(data.user, ['email', 'id', 'name']))
+      })
+    } else {
+      setUser({})
+    }
+  }, [asPath, authenticated])
 
   const login = async (data) => {
     const userData = pick(data, ['email', 'id', 'name'])
 
     setAuthenticated(true)
     setUser(userData)
-
-    Cookie.set(userCookieName, userData)
   }
 
   const logout = async () => {
@@ -38,7 +46,6 @@ const useContainer = () => {
     setUser({})
 
     Cookie.remove(authCookieName)
-    Cookie.remove(userCookieName)
 
     push('/start?logout=1')
   }
