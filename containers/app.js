@@ -6,6 +6,7 @@ import { useRouter } from 'next/router'
 const useContainer = () => {
   const { events } = useRouter()
 
+  const [processing, setProcessing] = useState(false)
   const [pushing, setPushing] = useState(false)
 
   useEffect(() => {
@@ -25,6 +26,8 @@ const useContainer = () => {
   useEffect(() => {
     pushing ? NProgress.start() : NProgress.done()
   }, [pushing])
+
+  return { processing, setProcessing }
 }
 
 export const { Provider: AppProvider, useContainer: useApp } =

@@ -4,6 +4,7 @@ import { createContainer } from 'unstated-next'
 import { Input } from './input'
 import { kebabCase } from 'lodash'
 import { object, string } from 'yup'
+import { useApp } from '../containers/app'
 import { useAuth } from '../containers/auth'
 import { useFormik } from 'formik'
 import { useRouter } from 'next/router'
@@ -19,6 +20,7 @@ const { Provider: StartFormProvider, useContainer: useStartForm } =
 
 export const FormCreate = () => {
   const { push } = useRouter()
+  const { setProcessing } = useApp()
 
   const [callback, setCallback] = useState()
 
@@ -29,6 +31,7 @@ export const FormCreate = () => {
       url: '',
     },
     onSubmit: async (values) => {
+      setProcessing(true)
       setCallback()
 
       await fetch('/api/v1/posts', {
@@ -46,6 +49,12 @@ export const FormCreate = () => {
         method: 'POST',
       })
         .then(async (response) => {
+          setProcessing(false)
+
+          if (!response.ok) {
+            throw Error('Bad Request')
+          }
+
           const { post } = await response.json()
 
           setCallback({
@@ -140,6 +149,7 @@ export const FormStart = () => {
 const FormStartCode = () => {
   const { login } = useAuth()
   const { push } = useRouter()
+  const { setProcessing } = useApp()
   const { setRedirect, setStep, step } = useStartForm()
 
   const [callback, setCallback] = useState()
@@ -149,12 +159,15 @@ const FormStartCode = () => {
       code: '',
     },
     onSubmit: async (values) => {
+      setProcessing(true)
       setCallback()
 
       await fetch(`/api/v1/passes/${values.code}`, {
         method: 'DELETE',
       })
         .then(async (response) => {
+          setProcessing(false)
+
           if (!response.ok) {
             throw Error('Not Found')
           }
@@ -236,6 +249,7 @@ const FormStartCode = () => {
 
 const FormStartEmail = () => {
   const { query } = useRouter()
+  const { setProcessing } = useApp()
   const { setStep, step } = useStartForm()
 
   const [callback, setCallback] = useState()
@@ -246,6 +260,7 @@ const FormStartEmail = () => {
       redirect: query.redirect,
     },
     onSubmit: async (values) => {
+      setProcessing(true)
       setCallback()
 
       await fetch('/api/v1/passes', {
@@ -254,6 +269,7 @@ const FormStartEmail = () => {
         method: 'POST',
       })
 
+      setProcessing(false)
       setStep('code')
     },
     validationSchema: object({
@@ -323,6 +339,7 @@ const FormStartProfile = () => {
   const { login } = useAuth()
   const { push } = useRouter()
   const { redirect, step } = useStartForm()
+  const { setProcessing } = useApp()
 
   const [callback, setCallback] = useState()
 
@@ -331,6 +348,7 @@ const FormStartProfile = () => {
       name: '',
     },
     onSubmit: async (values) => {
+      setProcessing(true)
       setCallback()
 
       await fetch('/api/v1/user', {
@@ -339,6 +357,8 @@ const FormStartProfile = () => {
         method: 'PATCH',
       })
         .then(async (response) => {
+          setProcessing(false)
+
           if (!response.ok) {
             throw Error(response.statusText)
           }
