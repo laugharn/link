@@ -1,9 +1,11 @@
 import { useApp } from '../containers/app'
 import { useAuth } from '../containers/auth'
 import { useLayoutEffect } from 'react'
+import { useRouter } from 'next/router'
 
 const Processor = () => {
-    const { logout } = useAuth()
+  const { logout } = useAuth()
+  const { push } = useRouter()
   const { setShowMenu } = useApp()
 
   useLayoutEffect(() => {
@@ -41,10 +43,28 @@ const Processor = () => {
           </button>
         </div>
         <div className="leading-6 md:leading-10 p-2 text-gray-700 dark:text-gray-300 text-lg md:text-4xl w-full">
-            <button className="text-gray-300 md:hover:text-blue-500" onClick={() => {
+          <div className="w-full">
+            <button
+              className="text-gray-500 md:hover:text-blue-500"
+              onClick={() => {
+                push('/profile/edit')
+                setShowMenu(false)
+              }}
+            >
+              Edit Profile
+            </button>
+          </div>
+          <div className="w-full">
+            <button
+              className="text-gray-300 md:hover:text-blue-500"
+              onClick={() => {
                 logout()
                 setShowMenu(false)
-            }}>Logout</button>
+              }}
+            >
+              Logout
+            </button>
+          </div>
         </div>
       </div>
     </div>

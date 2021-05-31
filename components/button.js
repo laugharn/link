@@ -9,7 +9,7 @@ export const ButtonMenu = () => {
     }}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        className="h-6 md:h-10 md:hover:text-blue-500 w-6 md:w-10"
+        className="h-6 md:h-10 text-gray-500 md:hover:text-blue-500 w-6 md:w-10"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
