@@ -12,8 +12,18 @@ const config = {
       transparent: 'transparent',
       ...colors,
     },
+    extend: {
+      animation: {
+        'spin-slow': 'spin 2s linear infinite',
+      },
+    },
     fontFamily: {
-      sans: ['InterDisplay var', 'InterDisplay', 'Inter', ...defaultTheme.fontFamily.sans],
+      sans: [
+        'InterDisplay var',
+        'InterDisplay',
+        'Inter',
+        ...defaultTheme.fontFamily.sans,
+      ],
     },
   },
 }
