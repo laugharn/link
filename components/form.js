@@ -4,6 +4,7 @@ import { createContainer } from 'unstated-next'
 import { Input } from './input'
 import { kebabCase } from 'lodash'
 import { object, string } from 'yup'
+import { TextareaForm } from './textarea'
 import { useApp } from '../containers/app'
 import { useAuth } from '../containers/auth'
 import { useFormik } from 'formik'
@@ -345,6 +346,7 @@ const FormStartProfile = () => {
 
   const form = useFormik({
     initialValues: {
+      description: '',
       name: '',
     },
     onSubmit: async (values) => {
@@ -377,6 +379,7 @@ const FormStartProfile = () => {
         })
     },
     validationSchema: object({
+      description: string().max(140, 'Too Long'),
       name: string()
         .min(2, 'Too Short')
         .max(16, 'Too Long')
@@ -410,6 +413,21 @@ const FormStartProfile = () => {
               placeholder="2-16 characters, lowercase or numbers"
               touched={form.touched.name}
               value={form.values.name}
+            />
+          </div>
+          <div className="p-2 w-full">
+            <TextareaForm
+              autoCapitalize="none"
+              autoCorrect="off"
+              error={form.errors.description}
+              id="description"
+              label="Description"
+              name="description"
+              onBlur={form.handleBlur}
+              onChange={form.handleChange}
+              placeholder="140 characters, max"
+              touched={form.touched.description}
+              value={form.values.description}
             />
           </div>
           <div className="p-2 w-full">

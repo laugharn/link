@@ -8,6 +8,7 @@ const useContainer = () => {
 
   const [processing, setProcessing] = useState(false)
   const [pushing, setPushing] = useState(false)
+  const [showMenu, setShowMenu] = useState(false)
 
   useEffect(() => {
     events.on('routeChangeComplete', () => {
@@ -27,7 +28,7 @@ const useContainer = () => {
     pushing ? NProgress.start() : NProgress.done()
   }, [pushing])
 
-  return { processing, setProcessing }
+  return { processing, setProcessing, setShowMenu, showMenu }
 }
 
 export const { Provider: AppProvider, useContainer: useApp } =

@@ -1,6 +1,7 @@
 import { AppProvider } from '~/containers/app'
 import { AuthProvider } from '~/containers/auth'
 import { Footer } from '~/components/footer'
+import { Menu } from '~/components/menu'
 import { Nav } from '~/components/nav'
 import { Processing } from '~/components/processing'
 
@@ -15,6 +16,7 @@ const App = ({ Component, pageProps }) => {
           <Component {...pageProps} />
           <Footer />
           <Processing />
+          <Menu />
         </div>
       </AuthProvider>
     </AppProvider>

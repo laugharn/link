@@ -7,6 +7,10 @@ enum PostType {
     link
 }
 
+enum UserType {
+    user
+}
+
 generator client {
     previewFeatures = ["filterJson", "nApi"]
     provider        = "prisma-client-js"
@@ -61,15 +65,17 @@ model Url {
 }
 
 model User {
-    id        Int      @id @default(autoincrement())
+    id          Int      @id @default(autoincrement())
     // Fields
-    email     String   @unique
-    name      String?
-    version   Int      @default(1)
+    description String?
+    email       String   @unique
+    name        String?
+    types       UserType[]
+    version     Int      @default(1)
     // Relations
-    passes    Pass[]
-    posts     Post[]
-    urls      Url[]
+    passes      Pass[]
+    posts       Post[]
+    urls        Url[]
     // Timestamps
-    createdAt DateTime @default(now())
+    createdAt   DateTime @default(now())
 }

@@ -39,7 +39,7 @@ const update = async (req, res) => {
   const { body, session } = req
 
   const id = session.get('id')
-  const { name } = body
+  const { name, ...data } = body
 
   if (!id) {
     res.statusMessage = 'Unauthorized'
@@ -83,6 +83,7 @@ const update = async (req, res) => {
   const user = await prisma.user.update({
     data: {
       name,
+      ...data,
     },
     where: {
       id,
