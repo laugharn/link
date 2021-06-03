@@ -17,9 +17,9 @@ export const WayfindingAscending = memo(({ href, isActive, ...props }) => (
     <a
       className={`${
         isActive
-          ? 'text-cyan-500'
-          : 'text-gray-300'
-      } md:hover:text-blue-500`}
+          ? 'animate-pulse md:hover:animate-none'
+          : ''
+      } text-gray-300 md:hover:text-blue-500`}
       {...props}
     >
       ↑
@@ -32,9 +32,9 @@ export const WayfindingDescending = memo(({ href, isActive, ...props }) => (
     <a
       className={`${
         isActive
-          ? 'text-cyan-500'
-          : 'text-gray-300'
-      } md:hover:text-blue-500`}
+          ? 'animate-pulse md:hover:animate-none'
+          : ''
+      } text-gray-300 md:hover:text-blue-500`}
       {...props}
     >
       ↓

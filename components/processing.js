@@ -10,7 +10,7 @@ const Processor = () => {
   }, [])
 
   return (
-    <div className="fixed flex inset-0 items-center justify-center z-50">
+    <div className="backdrop-blur-sm backdrop-filter backdrop-grayscale fixed flex inset-0 items-center justify-center z-50">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         className="animate-spin-slow h-48 md:h-64 w-48 md:w-64"

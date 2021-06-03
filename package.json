@@ -21,7 +21,7 @@
     "postcss": "8.3.0",
     "prisma": "2.23.0",
     "prop-types": "15.7.2",
-    "tailwindcss": "2.2.0-canary.9"
+    "tailwindcss": "2.2.0-canary.11"
   },
   "license": "UNLICENSED",
   "prettier": {
