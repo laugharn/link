@@ -61,6 +61,77 @@ const { Provider: PostProvider, useContainer: usePost } = createContainer(
   }
 )
 
+export const CommentPost = () => {
+  const { isDeleted } = usePost()
+
+  return (
+    <ul className="leading-6 md:leading-10 p-2 relative text-lg md:text-4xl w-full">
+      <CommentPostBody />
+      {isDeleted && (
+        <div className="absolute bg-white dark:bg-black inset-0 opacity-50 z-20" />
+      )}
+    </ul>
+  )
+}
+
+const CommentPostBody = () => {
+  const { post } = usePost()
+
+  if (post.body) {
+    return (
+      <li className="text-gray-700 dark:text-gray-300">
+        {post.body}
+      </li>
+    )
+  }
+
+  return null
+}
+
+export const CommentPosts = ({ context, cursor, filters, posts }) => {
+  return (
+    <div className="md:space-y-4 w-full">
+      {posts.length === 0 && (
+        <div className="leading-6 md:leading-10 p-2 text-lg md:text-4xl text-gray-300 dark:text-gray-800">
+          No discussion matches your query.
+        </div>
+      )}
+      {posts.map((post) => {
+        return (
+          <Post key={post.id} post={post}>
+            <CommentPost />
+          </Post>
+        )
+      })}
+    </div>
+  )
+  // return (
+  //   <div className="w-full">
+  //     <Filters
+  //       context={context}
+  //       cursor={cursor}
+  //       filters={filters}
+  //       posts={posts}
+  //     />
+  //     <div className="md:space-y-4">
+  //       {posts.length === 0 && (
+  //         <div className="leading-6 md:leading-10 p-2 text-lg md:text-4xl text-gray-300 dark:text-gray-800">
+  //           No links match your query.
+  //         </div>
+  //       )}
+  //       {posts.map((post) => {
+  //         return (
+  //           <Post filters={filters} key={post.id} post={post}>
+  //             <LinkPost />
+  //           </Post>
+  //         )
+  //       })}
+  //     </div>
+  //     <Pagination filters={filters} cursor={cursor} />
+  //   </div>
+  // )
+}
+
 const Filters = ({ cursor, filters, posts = [] }) => {
   const tags = filters.tag ? sortBy(filters.tag.split(','), (tag) => tag) : []
 
@@ -241,12 +312,27 @@ export const LinkPost = () => {
       <LinkPostTitle />
       <LinkPostDescription />
       <LinkPostUrl />
+      <LinkPostCommentBody />
       <LinkData />
       {isDeleted && (
         <div className="absolute bg-white dark:bg-black inset-0 opacity-50 z-20" />
       )}
     </ul>
   )
+}
+
+const LinkPostCommentBody = () => {
+  const { post } = usePost()
+
+  if (post.children && post.children.length > 0 && post.children[0].body) {
+    return (
+      <li className="text-gray-700 dark:text-gray-300">
+        {post.children[0].body}
+      </li>
+    )
+  }
+
+  return null
 }
 
 const LinkPostDescription = () => {

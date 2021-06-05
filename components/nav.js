@@ -26,7 +26,7 @@ export const Nav = () => {
         </Link>
         {' / '}
         <Link href="/create">
-          <a className="text-teal-500 md:hover:text-blue-500" title="Create">
+          <a className="text-emerald-500 md:hover:text-blue-500" title="Create">
             Create
           </a>
         </Link>

@@ -27,6 +27,7 @@ export const FormCreate = () => {
 
   const form = useFormik({
     initialValues: {
+      body: 'This is a comment on a link post.',
       tags: '',
       type: 'link',
       url: '',
@@ -73,6 +74,7 @@ export const FormCreate = () => {
         })
     },
     validationSchema: object({
+      body: string().max(140, 'Too Long'),
       url: string()
         .required('Required')
         .url('Invalid URL')
