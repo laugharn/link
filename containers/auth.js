@@ -1,6 +1,7 @@
 import { authCookieName } from '../lib/session'
 import Cookie from 'js-cookie'
 import { createContainer } from 'unstated-next'
+import localforage from 'localforage'
 import { pick } from 'lodash'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
@@ -15,10 +16,18 @@ const useContainer = () => {
     const auth = Boolean(Cookie.get(authCookieName))
 
     if (auth) {
-      setAuthenticated(true)
+      localforage.getItem('user').then((data) => {
+        setAuthenticated(true)
+
+        if (data) {
+          setUser(data)
+        }
+      })
     } else {
-      setUser({})
-      setAuthenticated(false)
+      localforage.removeItem('user').then(() => {
+        setUser({})
+        setAuthenticated(false)
+      })
     }
   }, [asPath])
 
@@ -26,8 +35,11 @@ const useContainer = () => {
     if (authenticated) {
       fetch('/api/v1/user').then(async (response) => {
         const data = await response.json()
-  
-        setUser(pick(data.user, ['email', 'id', 'name']))
+        const userData = pick(data.user, ['email', 'id', 'name'])
+
+        setUser(userData)
+
+        await localforage.setItem('user', userData)
       })
     } else {
       setUser({})
@@ -37,17 +49,21 @@ const useContainer = () => {
   const login = async (data) => {
     const userData = pick(data, ['email', 'id', 'name'])
 
-    setAuthenticated(true)
-    setUser(userData)
+    localforage.setItem('user', userData).then(() => {
+      setAuthenticated(true)
+      setUser(userData)
+    })
   }
 
   const logout = async () => {
-    setAuthenticated(false)
-    setUser({})
+    localforage.removeItem('user').then(() => {
+      setAuthenticated(false)
+      setUser({})
 
-    Cookie.remove(authCookieName)
+      Cookie.remove(authCookieName)
 
-    push('/start?logout=1')
+      push('/start?logout=1')
+    })
   }
 
   return { authenticated, login, logout, setAuthenticated, user }
