@@ -27,7 +27,6 @@ export const FormCreate = () => {
 
   const form = useFormik({
     initialValues: {
-      body: '',
       tags: '',
       type: 'link',
       url: '',
@@ -74,7 +73,7 @@ export const FormCreate = () => {
         })
     },
     validationSchema: object({
-      body: string().max(140, 'Too Long'),
+      // body: string().max(140, 'Too Long'),
       url: string()
         .required('Required')
         .url('Invalid URL')
@@ -131,7 +130,7 @@ export const FormCreate = () => {
             value={form.values.tags}
           />
         </div>
-        <div className="p-2">
+        {/* <div className="p-2">
           <TextareaForm
             autoCapitalize="none"
             autoCorrect="off"
@@ -145,7 +144,7 @@ export const FormCreate = () => {
             touched={form.touched.body}
             value={form.values.body}
           />
-        </div>
+        </div> */}
         <div className="p-2">
           <ButtonSubmit disabled={disabled}>Submit</ButtonSubmit>
         </div>
