@@ -4,6 +4,7 @@ datasource db {
 }
 
 enum PostType {
+    comment
     link
 }
 
@@ -12,7 +13,7 @@ enum UserType {
 }
 
 generator client {
-    previewFeatures = ["filterJson", "nApi"]
+    previewFeatures = ["filterJson", "nApi", "selectRelationCount"]
     provider        = "prisma-client-js"
 }
 
@@ -32,20 +33,24 @@ model Pass {
 }
 
 model Post {
-    id        Int      @id @default(autoincrement())
+    id          Int       @id @default(autoincrement())
     // Fields
-    body      String?
-    tags      String[]
-    type      PostType
-    version   Int      @default(1)
+    body        String?
+    tags        String[]
+    type        PostType
+    version     Int       @default(2)
     // Relations
-    url       Url?     @relation(fields: [urlId], references: [id])
-    urlId     Int?
-    user      User     @relation(fields: [userId], references: [id])
-    userId    Int
+    children    Post[]    @relation("children")
+    parentId    Int?
+    parent      Post?     @relation("children", fields: [parentId], references: [id])
+    url         Url?      @relation(fields: [urlId], references: [id])
+    urlId       Int?
+    user        User      @relation(fields: [userId], references: [id])
+    userId      Int
     // Timestamps
-    createdAt DateTime @default(now())
-    updatedAt DateTime @default(now()) @updatedAt
+    createdAt   DateTime  @default(now())
+    discussedAt DateTime?
+    updatedAt   DateTime  @default(now()) @updatedAt
 }
 
 model Url {
@@ -65,17 +70,17 @@ model Url {
 }
 
 model User {
-    id          Int      @id @default(autoincrement())
+    id          Int        @id @default(autoincrement())
     // Fields
     description String?
-    email       String   @unique
+    email       String     @unique
     name        String?
     types       UserType[]
-    version     Int      @default(1)
+    version     Int        @default(1)
     // Relations
     passes      Pass[]
     posts       Post[]
     urls        Url[]
     // Timestamps
-    createdAt   DateTime @default(now())
+    createdAt   DateTime   @default(now())
 }

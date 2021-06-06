@@ -4,7 +4,7 @@ const defaultTheme = require('tailwindcss/defaultTheme')
 const config = {
   darkMode: 'media',
   mode: 'jit',
-  plugins: [require('@tailwindcss/forms')],
+  plugins: [require('@tailwindcss/forms'), require('@tailwindcss/line-clamp')],
   purge: ['./pages/**/*.js', './components/**/*.js'],
   theme: {
     colors: {

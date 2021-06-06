@@ -73,6 +73,7 @@ export const FormCreate = () => {
         })
     },
     validationSchema: object({
+      // body: string().max(140, 'Too Long'),
       url: string()
         .required('Required')
         .url('Invalid URL')
@@ -129,6 +130,21 @@ export const FormCreate = () => {
             value={form.values.tags}
           />
         </div>
+        {/* <div className="p-2">
+          <TextareaForm
+            autoCapitalize="none"
+            autoCorrect="off"
+            error={form.errors.body}
+            id="body"
+            label="Comment"
+            name="body"
+            onBlur={form.handleBlur}
+            onChange={form.handleChange}
+            placeholder="140 characters, max"
+            touched={form.touched.body}
+            value={form.values.body}
+          />
+        </div> */}
         <div className="p-2">
           <ButtonSubmit disabled={disabled}>Submit</ButtonSubmit>
         </div>

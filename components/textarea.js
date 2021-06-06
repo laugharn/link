@@ -31,7 +31,7 @@ export const Textarea = memo(({ error, id, touched, value, ...props }) => {
         touched && error
           ? 'border-red-300 dark:border-red-700'
           : 'border-gray-300 dark:border-gray-700'
-      } focus:border-gray-700 dark:focus:border-gray-300 leading-6 md:leading-10 outline-none p-2 rounded-none text-lg md:text-4xl w-full`}
+      } focus:border-gray-700 dark:focus:border-gray-300 leading-6 md:leading-10 outline-none p-2 rounded-md text-lg md:text-4xl w-full`}
       id={id}
       value={value}
       {...props}
@@ -54,7 +54,7 @@ export const TextareaForm = memo(
     return (
       <div className="w-full">
         {label && (
-          <label className="block leading-6 md:leading-10 text-lg md:text-4xl text-gray-600 dark:text-gray-400 w-full">
+          <label className="block leading-6 md:leading-10 pb-1 md:pb-2 text-lg md:text-4xl text-gray-600 dark:text-gray-400 w-full">
             {label}
           </label>
         )}
@@ -66,7 +66,7 @@ export const TextareaForm = memo(
           {...props}
         />
         {touched && error && showError && (
-          <div className="leading-6 md:leading-10 text-lg md:text-4xl text-red-300 dark:text-red-700">
+          <div className="leading-6 md:leading-10 pt-1 md:pt-2 text-lg md:text-4xl text-red-300 dark:text-red-700">
             {error}
           </div>
         )}

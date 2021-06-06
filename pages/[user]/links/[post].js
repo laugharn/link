@@ -3,7 +3,7 @@ import { Head } from '~/components/head'
 import { LinkPost, Post } from '~/components/post'
 import { UserHeading } from '~/components/user'
 
-const Page = ({ post, user }) => (
+const Page = ({ children, cursor, filters, post, user }) => (
   <>
     <Head>
       <title>
