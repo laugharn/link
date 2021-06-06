@@ -1,9 +1,10 @@
 import { createContainer } from 'unstated-next'
 import { Fragment } from 'react'
 import { humanTimeDiff } from '../lib/time'
-import { isFinite, omit, uniq, sortBy } from 'lodash'
 import Link from 'next/link'
+import { omit, uniq, sortBy } from 'lodash'
 import { useAuth } from '../containers/auth'
+import { useRouter } from 'next/router'
 import { useState } from 'react'
 import {
   WayfindingAdd,
@@ -12,8 +13,11 @@ import {
   WayfindingRemove,
 } from './wayfinding'
 
-const addToFilters = (filters = {}, addition = {}, config = {}) => {
-  const { removeKeys = [] } = config
+const getBasepath = (asPath) => new URL(`https://url.com${asPath}`).pathname
+
+export const getHrefFromFilters = (filters = {}, config = {}) => {
+  const { addition = {}, removeKeys = [], useAsPath = false } = config
+  const { asPath } = useRouter()
 
   const query = omit(
     {
@@ -23,22 +27,11 @@ const addToFilters = (filters = {}, addition = {}, config = {}) => {
     removeKeys
   )
 
-  const pathname = query.user ? `/${query.user}` : '/'
-
-  if (query.user) {
-    delete query.user
-  }
-
-  return {
-    pathname,
-    query,
-  }
-}
-
-export const removeFromFilters = (filters = {}, removeKeys = []) => {
-  const query = omit(filters, removeKeys)
-
-  const pathname = query.user ? `/${query.user}` : '/'
+  const pathname = useAsPath
+    ? new URL(`https://url.com${asPath}`).pathname
+    : query.user
+    ? `/${query.user}`
+    : '/'
 
   if (query.user) {
     delete query.user
@@ -61,12 +54,60 @@ const { Provider: PostProvider, useContainer: usePost } = createContainer(
   }
 )
 
+const CommentData = () => {
+  const { asPath } = useRouter()
+  const { authenticated, user } = useAuth()
+  const { isDeleting, post, setIsDeleted, setIsDeleting } = usePost()
+
+  const basepath = new URL(`https://url.com${asPath}`).pathname
+
+  return (
+    <li className="text-gray-300 dark:text-gray-700">
+      <Link href={`${basepath}?cursor=${post.id}`}>
+        <a className="text-gray-500 md:hover:text-blue-500">#{post.id}</a>
+      </Link>
+      {` / `}
+      <Link href={`/${post.user.name}`}>
+        <a className="text-black dark:text-white md:hover:text-blue-500">
+          {post.user.name}
+        </a>
+      </Link>
+      {` / ${humanTimeDiff(post.createdAt)}`}
+      {authenticated && user?.id === post.user.id && (
+        <>
+          {' / '}
+          <button
+            className="text-red-300 dark:text-red-800 md:hover:text-blue-500"
+            disabled={isDeleting}
+            onClick={async () => {
+              setIsDeleting(true)
+
+              await fetch(`/api/v1/posts/${post.id}`, {
+                method: 'DELETE',
+              }).then((response) => {
+                setIsDeleting(false)
+
+                if (response.ok) {
+                  setIsDeleted(true)
+                }
+              })
+            }}
+          >
+            Delete
+          </button>
+        </>
+      )}
+    </li>
+  )
+}
+
 export const CommentPost = () => {
   const { isDeleted } = usePost()
 
   return (
     <ul className="leading-6 md:leading-10 p-2 relative text-lg md:text-4xl w-full">
       <CommentPostBody />
+      <CommentData />
       {isDeleted && (
         <div className="absolute bg-white dark:bg-black inset-0 opacity-50 z-20" />
       )}
@@ -78,68 +119,81 @@ const CommentPostBody = () => {
   const { post } = usePost()
 
   if (post.body) {
-    return (
-      <li className="text-gray-700 dark:text-gray-300">
-        {post.body}
-      </li>
-    )
+    return <li className="text-gray-700 dark:text-gray-300">{post.body}</li>
   }
 
   return null
 }
 
-export const CommentPosts = ({ context, cursor, filters, posts }) => {
+export const CommentPosts = ({ cursor, filters, posts }) => {
   return (
-    <div className="md:space-y-4 w-full">
-      {posts.length === 0 && (
-        <div className="leading-6 md:leading-10 p-2 text-lg md:text-4xl text-gray-300 dark:text-gray-800">
-          No discussion matches your query.
+    <div className="w-full" id="comments">
+      <CommentFilters cursor={cursor} filters={filters} posts={posts} />
+      <div className="md:space-y-4">
+        {posts.length === 0 && (
+          <div className="leading-6 md:leading-10 p-2 text-lg md:text-4xl text-gray-300 dark:text-gray-800">
+            No comments match your query.
+          </div>
+        )}
+        {posts.map((post) => {
+          return (
+            <Post key={post.id} post={post}>
+              <CommentPost />
+            </Post>
+          )
+        })}
+      </div>
+      {cursor && (
+        <div className="pb-2 pt-6 px-2 text-lg md:text-4xl">
+          <Link
+            href={getHrefFromFilters(filters, {
+              addition: { cursor },
+              useAsPath: true,
+            })}
+          >
+            <a className="text-orange-500 md:hover:text-blue-500">
+              More Comments
+            </a>
+          </Link>
         </div>
       )}
-      {posts.map((post) => {
-        return (
-          <Post key={post.id} post={post}>
-            <CommentPost />
-          </Post>
-        )
-      })}
     </div>
   )
-  // return (
-  //   <div className="w-full">
-  //     <Filters
-  //       context={context}
-  //       cursor={cursor}
-  //       filters={filters}
-  //       posts={posts}
-  //     />
-  //     <div className="md:space-y-4">
-  //       {posts.length === 0 && (
-  //         <div className="leading-6 md:leading-10 p-2 text-lg md:text-4xl text-gray-300 dark:text-gray-800">
-  //           No links match your query.
-  //         </div>
-  //       )}
-  //       {posts.map((post) => {
-  //         return (
-  //           <Post filters={filters} key={post.id} post={post}>
-  //             <LinkPost />
-  //           </Post>
-  //         )
-  //       })}
-  //     </div>
-  //     <Pagination filters={filters} cursor={cursor} />
-  //   </div>
-  // )
+}
+
+const CommentFilters = ({ filters = {}, posts = [] }) => {
+  return (
+    <div className="bg-gray-500 leading-6 md:leading-10 p-2 text-gray-700 text-lg md:text-4xl w-full">
+      <Link href={getHrefFromFilters(filters, { useAsPath: true })}>
+        <a className="text-gray-300 md:hover:text-blue-500">
+          {posts.length} Comment{posts.length === 1 ? '' : 's'}
+        </a>
+      </Link>
+      {' / '}
+      <WayfindingAscending
+        href={getHrefFromFilters(filters, {
+          removeKeys: ['direction'],
+          useAsPath: true,
+        })}
+        isActive={filters.direction !== 'desc'}
+      />
+      <WayfindingDescending
+        href={getHrefFromFilters(filters, {
+          addition: { direction: 'desc' },
+          useAsPath: true,
+        })}
+        isActive={filters.direction === 'desc'}
+      />
+    </div>
+  )
 }
 
 const Filters = ({ cursor, filters, posts = [] }) => {
   const tags = filters.tag ? sortBy(filters.tag.split(','), (tag) => tag) : []
 
   return (
-    <div
-      className={`bg-gray-500 leading-6 md:leading-10 p-2 text-gray-700 text-lg md:text-4xl w-full`}
-    >
-      <Link href={addToFilters(filters)}>
+    <div className="bg-gray-500 leading-6 md:leading-10 p-2 text-gray-700 text-lg md:text-4xl w-full">
+      <Link href={getHrefFromFilters(filters)}>
         <a className="text-gray-300 md:hover:text-blue-500">
           {posts.length}
           {cursor ? ' ' : ' '}
@@ -148,11 +202,11 @@ const Filters = ({ cursor, filters, posts = [] }) => {
       </Link>
       {' / '}
       <WayfindingAscending
-        href={addToFilters(filters, { direction: 'asc' })}
+        href={getHrefFromFilters(filters, { addition: { direction: 'asc' } })}
         isActive={filters.direction === 'asc'}
       />
       <WayfindingDescending
-        href={removeFromFilters(filters, ['direction'])}
+        href={getHrefFromFilters(filters, { removeKeys: ['direction'] })}
         isActive={filters.direction !== 'asc'}
       />
       {filters.cursor && (
@@ -164,7 +218,7 @@ const Filters = ({ cursor, filters, posts = [] }) => {
             </a>
           </Link>
           <WayfindingRemove
-            href={removeFromFilters(filters, ['cursor'])}
+            href={getHrefFromFilters(filters, { removeKeys: ['cursor'] })}
             title="Remove cursor"
           />
         </>
@@ -178,7 +232,7 @@ const Filters = ({ cursor, filters, posts = [] }) => {
             </a>
           </Link>
           <WayfindingRemove
-            href={removeFromFilters(filters, ['domain'])}
+            href={getHrefFromFilters(filters, { removeKeys: ['domain'] })}
             title="Remove domain"
           />
         </>
@@ -192,7 +246,7 @@ const Filters = ({ cursor, filters, posts = [] }) => {
             </a>
           </Link>
           <WayfindingRemove
-            href={removeFromFilters(filters, ['host'])}
+            href={getHrefFromFilters(filters, { removeKeys: ['host'] })}
             title="Remove host"
           />
         </>
@@ -206,7 +260,7 @@ const Filters = ({ cursor, filters, posts = [] }) => {
             </a>
           </Link>
           <WayfindingRemove
-            href={removeFromFilters(filters, ['url'])}
+            href={getHrefFromFilters(filters, { removeKeys: ['url'] })}
             title="Remove URL"
           />
         </>
@@ -222,9 +276,11 @@ const Filters = ({ cursor, filters, posts = [] }) => {
                 <WayfindingRemove
                   href={
                     tags.length === 1
-                      ? removeFromFilters(filters, ['tag'])
-                      : addToFilters(filters, {
-                          tag: tags.filter((t) => t !== tag).join(','),
+                      ? getHrefFromFilters(filters, { removeKeys: ['tag'] })
+                      : getHrefFromFilters(filters, {
+                          addition: {
+                            tag: tags.filter((t) => t !== tag).join(','),
+                          },
                         })
                   }
                   title="Remove tag"
@@ -257,8 +313,10 @@ const LinkData = () => {
         <a className="text-gray-500 md:hover:text-blue-500">#{post.id}</a>
       </Link>
       <WayfindingAdd
-        href={addToFilters(filters, {
-          cursor: post.id,
+        href={getHrefFromFilters(filters, {
+          addition: {
+            cursor: post.id,
+          },
         })}
         title="Add cursor to query"
       />
@@ -269,13 +327,23 @@ const LinkData = () => {
         </a>
       </Link>
       <WayfindingAdd
-        href={addToFilters(filters, {
-          user: post.user.name,
+        href={getHrefFromFilters(filters, {
+          addition: {
+            user: post.user.name,
+          },
         })}
         title="Add user to query"
       />
       {` / ${humanTimeDiff(post.createdAt)}`}
       <LinkTags />
+      {post._count?.children > 0 && (
+        <>
+          {' / '}
+          <Link href={`/${post.user.name}/links/${post.id}#comments`}>
+            <a className="text-gray-500 md:hover:text-blue-500">Comments</a>
+          </Link>
+        </>
+      )}
       {authenticated && user?.id === post.user.id && (
         <>
           {' / '}
@@ -312,7 +380,6 @@ export const LinkPost = () => {
       <LinkPostTitle />
       <LinkPostDescription />
       <LinkPostUrl />
-      <LinkPostCommentBody />
       <LinkData />
       {isDeleted && (
         <div className="absolute bg-white dark:bg-black inset-0 opacity-50 z-20" />
@@ -321,26 +388,12 @@ export const LinkPost = () => {
   )
 }
 
-const LinkPostCommentBody = () => {
-  const { post } = usePost()
-
-  if (post.children && post.children.length > 0 && post.children[0].body) {
-    return (
-      <li className="text-gray-700 dark:text-gray-300">
-        {post.children[0].body}
-      </li>
-    )
-  }
-
-  return null
-}
-
 const LinkPostDescription = () => {
   const { post } = usePost()
 
   if (post.url?.meta?.description) {
     return (
-      <li className="text-gray-600 dark:text-gray-400">
+      <li className="line-clamp-2 text-gray-600 dark:text-gray-400">
         {post.url.meta.description}
       </li>
     )
@@ -396,15 +449,12 @@ const LinkPostTitle = () => {
           </a>
         </Link>
         <WayfindingAdd
-          href={addToFilters(
-            filters,
-            {
+          href={getHrefFromFilters(filters, {
+            addition: {
               url: post.url.url,
             },
-            {
-              removeKeys: ['domain', 'host'],
-            }
-          )}
+            removeKeys: ['domain', 'host'],
+          })}
           title="Add URL to query"
         />
       </li>
@@ -441,15 +491,12 @@ const LinkPostUrl = () => {
         </a>
       </Link>
       <WayfindingAdd
-        href={addToFilters(
-          filters,
-          {
+        href={getHrefFromFilters(filters, {
+          addition: {
             host: post?.url.parsed.host,
           },
-          {
-            removeKeys: ['domain', 'url'],
-          }
-        )}
+          removeKeys: ['domain', 'url'],
+        })}
         title="Add host to query"
       />
       {domain && (
@@ -461,15 +508,12 @@ const LinkPostUrl = () => {
             </a>
           </Link>
           <WayfindingAdd
-            href={addToFilters(
-              filters,
-              {
+            href={getHrefFromFilters(filters, {
+              addition: {
                 domain: post?.url.parsed.domain,
               },
-              {
-                removeKeys: ['host', 'url'],
-              }
-            )}
+              removeKeys: ['host', 'url'],
+            })}
             title="Add domain to query"
           />
         </>
@@ -491,10 +535,12 @@ const LinkTags = () => {
               {' '}
               <Tag tag={tag} />
               <WayfindingAdd
-                href={addToFilters(filters, {
-                  tag: filters.tag
-                    ? uniq([...filters.tag.split(','), tag]).join(',')
-                    : tag,
+                href={getHrefFromFilters(filters, {
+                  addition: {
+                    tag: filters.tag
+                      ? uniq([...filters.tag.split(','), tag]).join(',')
+                      : tag,
+                  },
                 })}
                 title="Add tag to query"
               />
@@ -515,8 +561,8 @@ const Pagination = ({ filters, cursor }) => {
 
   return (
     <div className="pb-2 pt-6 px-2 text-lg md:text-4xl">
-      <Link href={addToFilters(filters, { cursor })}>
-        <a className="text-cyan-500 md:hover:text-blue-500">More Links</a>
+      <Link href={getHrefFromFilters(filters, { addition: { cursor } })}>
+        <a className="text-orange-500 md:hover:text-blue-500">More Links</a>
       </Link>
     </div>
   )

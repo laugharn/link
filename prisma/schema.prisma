@@ -13,7 +13,7 @@ enum UserType {
 }
 
 generator client {
-    previewFeatures = ["filterJson", "nApi"]
+    previewFeatures = ["filterJson", "nApi", "selectRelationCount"]
     provider        = "prisma-client-js"
 }
 

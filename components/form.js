@@ -27,7 +27,7 @@ export const FormCreate = () => {
 
   const form = useFormik({
     initialValues: {
-      body: 'This is a comment on a link post.',
+      body: '',
       tags: '',
       type: 'link',
       url: '',
@@ -129,6 +129,21 @@ export const FormCreate = () => {
             placeholder="A comma separated list of tags"
             touched={form.touched.tags}
             value={form.values.tags}
+          />
+        </div>
+        <div className="p-2">
+          <TextareaForm
+            autoCapitalize="none"
+            autoCorrect="off"
+            error={form.errors.body}
+            id="body"
+            label="Comment"
+            name="body"
+            onBlur={form.handleBlur}
+            onChange={form.handleChange}
+            placeholder="140 characters, max"
+            touched={form.touched.body}
+            value={form.values.body}
           />
         </div>
         <div className="p-2">

@@ -1,9 +1,9 @@
 import { getPostByUser } from '~/lib/post'
 import { Head } from '~/components/head'
-import { LinkPost, Post } from '~/components/post'
+import { CommentPosts, LinkPost, Post } from '~/components/post'
 import { UserHeading } from '~/components/user'
 
-const Page = ({ post, user }) => (
+const Page = ({ children, cursor, filters, post, user }) => (
   <>
     <Head>
       <title>
@@ -14,6 +14,7 @@ const Page = ({ post, user }) => (
     <Post post={post}>
       <LinkPost />
     </Post>
+    <CommentPosts cursor={cursor} filters={filters} posts={children} />
   </>
 )
 
